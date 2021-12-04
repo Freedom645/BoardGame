@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  # proto:
+  #   command: ./proto/scripts/protoc.sh
+  #   build:
+  #     context: ./proto
+  #     dockerfile: DockerfileProto
+  #   volumes:
+  #     - .:/proto
+  othello-backend:
+    image: othello-backend
+    build: ./server/othello-backend
+    volumes:
+      - ./server/othello-backend:/usr/src/app/othello-backend # ③マウントディレクトリ
+    tty: true
+
+  othello-frontend:
+    image: othello-frontend
+    build: ./server/othello-frontend
+    ports:
+      - 4200:4200
+    volumes:
+      - ./server/othello-frontend:/usr/src/app/othello-frontend
+      - /usr/src/app/othello-frontend/node_modules # node_modulesは除外
+    tty: true
+    command: "ng serve --host=0.0.0.0 --poll 1"

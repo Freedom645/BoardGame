@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package chessGame;
+
+option go_package = "github.com/Freedom645/chess-backend/chessGame";
+
+service ChessGame {
+  rpc BoardState(BoardStateRequest) returns (BoardStateResponse) {}
+  rpc ShakeGame(stream ShakeGameRequest) returns (stream ShakeGameResponse);
+}
+
+message BoardStateRequest {
+  string boardUuid = 1;
+  string playerUuid = 2;
+}
+message BoardStateResponse {
+  string boardUuid = 1;
+  Board board = 2;
+}
+
+message ShakeGameRequest {
+  string boardUuid = 1;
+  string playerUuid = 2;
+  // 動かした駒情報
+  Piece movedPiece = 3;
+}
+message ShakeGameResponse {
+  Piece beforePiece = 1;
+  Piece afterPiece = 2;
+}
+
+message Player {
+  // 名前
+  string name = 2;
+  // 先手・後手
+  PlayerOrder playerOrder = 3;
+}
+
+// 盤面情報
+message Board {
+  // 盤面サイズ
+  int32 width = 2;
+  int32 height = 3;
+
+  // 駒情報
+  repeated Piece pieceList = 5;
+}
+
+// 駒種類
+enum PieceKind {
+  KING = 0;
+  QUEEN = 1;
+  ROOK = 3;
+  BISHOP = 4;
+  KNIGHT = 5;
+  PAWN = 6;
+}
+
+// プレイヤー（先手・後手）
+enum PlayerOrder {
+  WHITE = 0;
+  BLACK = 1;
+}
+
+// 座標
+message Point {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+// 駒情報
+message Piece {
+  // 持ち主
+  PlayerOrder playerOrder = 1;
+  // 駒種類
+  PieceKind id = 2;
+  // 駒番号
+  int32 no = 3;
+  // 座標
+  Point point = 4;
+}
