@@ -19,4 +19,4 @@ services:
       - ./server/othello-frontend:/usr/src/app/othello-frontend
       - /usr/src/app/othello-frontend/node_modules # node_modulesは除外
     tty: true
-    command: "ng serve --host=0.0.0.0 --poll 1"
+    # command: "ng serve --host=0.0.0.0 --poll 1"

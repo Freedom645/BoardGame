@@ -96,15 +96,13 @@ func HandleGetRoomList(ctx *gin.Context) {
 
 /* 部屋参加 */
 func HandleConnect(ctx *gin.Context) {
-	roomId, err := uuid.Parse(ctx.PostForm("roomId"))
+	roomId, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		// 400 ID形式間違い
 		ctx.String(http.StatusBadRequest, "the format of Room ID [%s] is incorrect.", ctx.PostForm("roomId"))
 		return
 	}
 
-	melodyManager.locker.Lock()
-	defer melodyManager.locker.Unlock()
 	socket := melodyManager.sockets[roomId]
 	if socket == nil {
 		// 400 存在しない部屋ID

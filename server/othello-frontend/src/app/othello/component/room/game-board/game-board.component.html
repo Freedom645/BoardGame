@@ -1,0 +1,17 @@
+<svg>
+  <svg:g>
+    <ng-container *ngFor="let st of board">
+      <svg:rect attr.x="{{st.x}}" attr.y="{{st.y}}" attr.width="{{st.width}}" attr.height="{{st.height}}"
+                [attr.fill]="st.bgColor" />
+    </ng-container>
+    <ng-container *ngFor="let st of cover">
+      <svg:rect attr.x="{{st.x}}" attr.y="{{st.y}}" attr.width="{{st.width}}" attr.height="{{st.height}}"
+                [attr.fill]="st.bgColor" [attr.fill-opacity]="st.opacity" (click)="change(st.index)"
+                (mouseover)="mouseover(st.index)" (mouseout)="mouseout(st.index)" />
+    </ng-container>
+    <ng-container *ngFor="let st of stone">
+      <svg:circle attr.cx="{{st.x}}" attr.cy="{{st.y}}" attr.r="{{st.r}}" attr.fill="{{st.stoneColor}}"
+                  attr.stroke="{{st.strokeColor}}" attr.stroke-width="{{st.strokeWidth}}" />
+    </ng-container>
+  </svg:g>
+</svg>
