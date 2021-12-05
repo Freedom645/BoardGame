@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	st "github.com/Freedom645/BoardGame/game/enum/stone_type"
-	point "github.com/Freedom645/BoardGame/game/point"
+	st "github.com/Freedom645/BoardGame/domain/enum/stone_type"
+	point "github.com/Freedom645/BoardGame/domain/game/point"
 )
 
 func TestNewBoard(t *testing.T) {

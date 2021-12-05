@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	st "github.com/Freedom645/BoardGame/game/enum/stone_type"
-	"github.com/Freedom645/BoardGame/game/point"
+	st "github.com/Freedom645/BoardGame/domain/enum/stone_type"
+	"github.com/Freedom645/BoardGame/domain/game/point"
 )
 
 const (

@@ -1,11 +1,9 @@
 package game
 
 import (
-	"sync"
-
-	"github.com/Freedom645/BoardGame/game/board"
-	gs "github.com/Freedom645/BoardGame/game/enum/game_step"
-	"github.com/Freedom645/BoardGame/room/player"
+	gs "github.com/Freedom645/BoardGame/domain/enum/game_step"
+	"github.com/Freedom645/BoardGame/domain/game/board"
+	"github.com/Freedom645/BoardGame/domain/player"
 )
 
 type Game struct {
@@ -17,9 +15,6 @@ type Game struct {
 	second *player.Player
 	/* 状態 */
 	step gs.Step
-
-	/* 排他ロック */
-	locker sync.RWMutex
 }
 
 func NewGame() *Game {
@@ -32,9 +27,6 @@ func NewGame() *Game {
 }
 
 func (g *Game) SetFirstPlayer(p player.Player) bool {
-	g.locker.Lock()
-	defer g.locker.Unlock()
-
 	if g.first != nil {
 		return false
 	}
@@ -44,9 +36,6 @@ func (g *Game) SetFirstPlayer(p player.Player) bool {
 }
 
 func (g *Game) SetSecondPlayer(p player.Player) bool {
-	g.locker.Lock()
-	defer g.locker.Unlock()
-
 	if g.second != nil {
 		return false
 	}
@@ -56,8 +45,5 @@ func (g *Game) SetSecondPlayer(p player.Player) bool {
 }
 
 func (g *Game) SetStep(step gs.Step) {
-	g.locker.Lock()
-	defer g.locker.Unlock()
-
 	g.step = step
 }
