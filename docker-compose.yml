@@ -1,18 +1,13 @@
 version: '3.7'
 
 services:
-  # proto:
-  #   command: ./proto/scripts/protoc.sh
-  #   build:
-  #     context: ./proto
-  #     dockerfile: DockerfileProto
-  #   volumes:
-  #     - .:/proto
   othello-backend:
     image: othello-backend
     build: ./server/othello-backend
+    ports:
+      - 8080:8080
     volumes:
-      - ./server/othello-backend:/usr/src/app/othello-backend # ③マウントディレクトリ
+      - ./server/othello-backend:/usr/src/app/othello-backend
     tty: true
 
   othello-frontend:

@@ -13,9 +13,9 @@ func main() {
 
 	rg := router.Group("/room")
 	rg.GET("", controller.HandleGetRoomList)
-	rg.GET("/:id", controller.HandleGetRoom)
 	rg.POST("", controller.HandleCreateRoom)
-	rg.GET("/ws", controller.HandleConnect)
+	rg.GET("/:id", controller.HandleGetRoom)
+	rg.POST("/ws", controller.HandleConnect)
 
 	// Listen and server on 0.0.0.0:8080
 	router.Run(":8080")

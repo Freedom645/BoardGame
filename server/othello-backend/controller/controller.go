@@ -122,27 +122,41 @@ func HandleConnect(ctx *gin.Context) {
 	}
 }
 
+/* メロディ作成 */
 func newMelody() *melody.Melody {
 	m := melody.New()
-	m.HandleMessage(handleMessage)
-	m.HandleConnect(handleConnect)
-	m.HandleDisconnect(handleDisconnect)
+	handlers := makeMelodyHandler(m)
+
+	m.HandleConnect(handlers.connectHandler)
+	m.HandleMessage(handlers.melodyHandler)
+	m.HandleDisconnect(handlers.disconnectHandler)
 
 	return m
 }
 
-/* ws開始 */
-func handleConnect(s *melody.Session) {
-	log.Printf("websocket connection open. [session: %#v]\n", s)
-
+/* メロディハンドラ */
+type MelodyHandler struct {
+	/* ws開始 */
+	connectHandler func(*melody.Session)
+	/* wsメッセージ受信 */
+	melodyHandler func(*melody.Session, []byte)
+	/* ws終了 */
+	disconnectHandler func(*melody.Session)
 }
 
-/* wsメッセージ */
-func handleMessage(s *melody.Session, msg []byte) {
+/* メロディハンドラ作成 */
+func makeMelodyHandler(m *melody.Melody) MelodyHandler {
+	res := MelodyHandler{
+		connectHandler: func(s *melody.Session) {
+			log.Printf("websocket connection open. [session: %#v]\n", s)
+		},
+		melodyHandler: func(s *melody.Session, msg []byte) {
+			m.Broadcast(msg)
+		},
+		disconnectHandler: func(s *melody.Session) {
+			log.Printf("websocket connection close. [session: %#v]\n", s)
+		},
+	}
 
-}
-
-/* ws終了 */
-func handleDisconnect(s *melody.Session) {
-	log.Printf("websocket connection close. [session: %#v]\n", s)
+	return res
 }
