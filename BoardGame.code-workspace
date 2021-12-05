@@ -10,6 +10,8 @@
 		},
 		"gopls": {
 			"experimentalWorkspaceModule": true
-		}
+		},
+		"plantuml.diagramsRoot": "design",
+		"plantuml.exportOutDir": "design/image"
 	}
 }
