@@ -9,7 +9,7 @@ export class WebSocketService {
   private readonly URL = environment.api.ws + environment.api.host;
 
   public connect<T>(roomId: string): WebSocketSubject<T> {
-    return webSocket(this.makeConfig(`${this.URL}/room/${roomId}/ws`));
+    return webSocket<T>(this.makeConfig<T>(`${this.URL}/room/${roomId}/ws`));
   }
 
   private makeConfig<T>(url: string): WebSocketSubjectConfig<T> {

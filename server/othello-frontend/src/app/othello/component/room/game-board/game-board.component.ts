@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Point, StoneType } from 'src/app/othello/model/game';
+import { ResizeService } from 'src/app/service/resize.service';
 
 interface BoardMass {
   index: number,
@@ -18,60 +20,94 @@ interface Stone {
   x: number,
   y: number,
   r: number,
-  stoneColor: string,
-  strokeColor: string,
   strokeWidth: number,
 }
-
-const SIZE = 100;
-
-const DEFAULT_BOARD = {
-  width: SIZE - 2,
-  height: SIZE - 2,
-  bgColor: "green"
-};
 
 @Component({
   selector: 'app-game-board',
   templateUrl: './game-board.component.html',
   styleUrls: ['./game-board.component.scss']
 })
-export class GameBoardComponent implements OnInit {
-  readonly boardMass = 8;
-  board: BoardMass[];
-  cover: BoardCover[];
-  stone: Stone[];
+export class GameBoardComponent implements OnInit, AfterViewInit {
+  @ViewChild('svg') svgElement!: ElementRef<SVGElement>;
 
-  constructor() {
-    this.board = [];
-    this.cover = [];
+  readonly boardMass = 8;
+  boardPanel: BoardMass[];
+  coverPanel: BoardCover[];
+  stonePanel: Stone[];
+
+  @Input() stone: StoneType[];
+  @Output() clickBoard = new EventEmitter<Point>();
+
+  size: number = 50;
+  offset: number = 0;
+
+  get DEFAULT_BOARD() {
+    return {
+      width: this.size - 2,
+      height: this.size - 2,
+      bgColor: "green"
+    };
+  }
+
+
+  constructor(
+    private resizeService: ResizeService,
+  ) {
+    this.boardPanel = [];
+    this.coverPanel = [];
+    this.stonePanel = [];
     this.stone = [];
+
+    this.initializeBoard();
+    this.resizeService.size.subscribe((_) => {
+      this.resize();
+    });
+  }
+
+  private initializeBoard() {
     for (let i = 0; i < this.boardMass * this.boardMass; i++) {
-      this.board.push(this.makeMass(i));
-      this.cover.push(this.makeCover(i));
+      this.boardPanel.push(this.makeMass(i));
+      this.coverPanel.push(this.makeCover(i));
+      this.stonePanel.push(this.makeStone(i));
+    }
+  }
+
+  private resize() {
+    const maxWidth = this.svgElement.nativeElement.clientWidth;
+    this.size = Math.floor(maxWidth / this.boardMass);
+    this.offset = Math.floor((maxWidth - this.size * this.boardMass) / 2);
+
+    this.boardPanel.splice(0);
+    this.coverPanel.splice(0);
+    this.stonePanel.splice(0);
+    for (let i = 0; i < this.boardMass * this.boardMass; i++) {
+      this.boardPanel.push(this.makeMass(i));
+      this.coverPanel.push(this.makeCover(i));
+      this.stonePanel.push(this.makeStone(i));
     }
   }
 
   private makeMass(index: number): BoardMass {
-    const x = (index % this.boardMass) * SIZE;
-    const y = Math.floor(index / this.boardMass) * SIZE;
-    const boardMass: BoardMass = { index, x, y, ...DEFAULT_BOARD };
+    const x = (index % this.boardMass) * this.size + this.offset;
+    const y = Math.floor(index / this.boardMass) * this.size + this.offset;
+    const boardMass: BoardMass = { index, x, y, ...this.DEFAULT_BOARD };
     return boardMass;
   }
 
   private makeCover(index: number): BoardCover {
-    const x = (index % this.boardMass) * SIZE;
-    const y = Math.floor(index / this.boardMass) * SIZE;
-    const boardCover: BoardCover = { index, x, y, ...DEFAULT_BOARD, opacity: 0 };
+    const x = (index % this.boardMass) * this.size + this.offset;
+    const y = Math.floor(index / this.boardMass) * this.size + this.offset;
+    const boardCover: BoardCover = { index, x, y, ...this.DEFAULT_BOARD, opacity: 0 };
     boardCover.bgColor = "yellow";
     return boardCover;
   }
 
-  private makeStone(index: number, isBlack: boolean): Stone {
-    const x = (index % this.boardMass) * SIZE + SIZE / 2;
-    const y = Math.floor(index / this.boardMass) * SIZE + SIZE / 2;
-    const r = SIZE * 0.5 * 0.8;
-    const stone: Stone = { index, x, y, r, stoneColor: isBlack ? "black" : "white", strokeColor: isBlack ? "white" : "black", strokeWidth: 3 };
+  private makeStone(index: number): Stone {
+    const x = (index % this.boardMass) * this.size + this.size / 2 + this.offset;
+    const y = Math.floor(index / this.boardMass) * this.size + this.size / 2 + this.offset;
+    const r = this.size * 0.5 * 0.8;
+    const stone: Stone = { index, x, y, r, strokeWidth: 3 };
 
     return stone;
   }
@@ -79,16 +115,25 @@ export class GameBoardComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  ngAfterViewInit(): void {
+    this.resize();
+  }
+
   change(index: number) {
-    if (this.stone.find(st => st.index == index)) {
+    if (this.stone[index] != "None") {
       return;
     }
+
+    const x = index % this.boardMass;
+    const y = Math.floor(index / this.boardMass);
+    this.clickBoard.emit({ x, y });
+
+    this.stone[index] = Math.random() > 0.5 ? "White" : "Black";
     this.changeCover(index, 0);
-    this.stone.push(this.makeStone(index, true));
   }
 
   mouseover(index: number) {
-    if (this.stone.find(st => st.index == index)) {
+    if (this.stone[index] != "None") {
       return;
     }
     this.changeCover(index, 0.5);
@@ -99,7 +144,7 @@ export class GameBoardComponent implements OnInit {
   }
 
   private changeCover(index: number, opacity: number) {
-    const cover = this.cover.find(c => c.index == index);
+    const cover = this.coverPanel.find(c => c.index == index);
     if (!cover) {
       return;
     }

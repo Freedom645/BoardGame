@@ -8,6 +8,8 @@ import { RoomDetailComponent } from './component/room-detail/room-detail.compone
 import { OthelloRoutingModule } from './othello-routing.module';
 import { RoomComponent } from './component/room/room.component';
 import { GameBoardComponent } from './component/room/game-board/game-board.component';
+import { RoomTableComponent } from './component/room-list/room-table/room-table.component';
+import { ResizeService } from '../service/resize.service';
 
 
 
@@ -16,7 +18,8 @@ import { GameBoardComponent } from './component/room/game-board/game-board.compo
     RoomListComponent,
     RoomDetailComponent,
     RoomComponent,
-    GameBoardComponent
+    GameBoardComponent,
+    RoomTableComponent
   ],
   imports: [
     CommonModule,
@@ -26,6 +29,7 @@ import { GameBoardComponent } from './component/room/game-board/game-board.compo
   providers: [
     ApiService,
     WebSocketService,
+    ResizeService,
   ],
 })
 export class OthelloModule { }

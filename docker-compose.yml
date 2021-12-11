@@ -9,6 +9,7 @@ services:
     volumes:
       - ./server/othello-backend:/usr/src/app/othello-backend
     tty: true
+    # command: "go run main.go"
 
   othello-frontend:
     image: othello-frontend

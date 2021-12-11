@@ -1,46 +1,45 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription, take } from 'rxjs';
+import { AccountService } from 'src/app/service/account.service';
 import { ApiService } from 'src/app/service/api.service';
 import { Room } from '../../model/room';
-import { RoomDetailComponent, RoomDetailDialogDate } from '../room-detail/room-detail.component';
 
 @Component({
   selector: 'app-room-list',
   templateUrl: './room-list.component.html',
   styleUrls: ['./room-list.component.scss']
 })
-export class RoomListComponent implements OnInit {
+export class RoomListComponent implements OnInit, OnDestroy {
 
-  displayedColumns: string[] = ['roomId', 'created', 'button'];
-  roomList: Room[] = []
+  readonly subscriptions: Subscription[] = [];
+
+  userName: string = "";
+  uid: string = "";
+  roomList: Room[] = [];
 
   constructor(
-    private api : ApiService,
+    private accService: AccountService,
+    private apiService: ApiService,
     private router: Router,
-    private acRoute: ActivatedRoute,
-    public dialog: MatDialog ,
-  ) { }
+    private acRouter: ActivatedRoute,
+  ) {
+  }
 
   ngOnInit(): void {
-    this.api.getRoomList().subscribe(
-      (res) => this.roomList = res
-    )
+    this.subscriptions.push(this.accService.getUsername().subscribe(userName => this.userName = userName));
+    this.subscriptions.push(this.accService.getUid().subscribe(uid => this.uid = uid));
+    this.subscriptions.push(this.apiService.getRoomList().pipe(take(1)).subscribe((res) => this.roomList = res));
   }
 
-  onClickRoomJoin(id: string){
-    const dialogRef = this.dialog.open(RoomDetailComponent, {
-      width: '100%',
-      minHeight: 'calc(100vh - 90px)',
-      height : 'auto',
-      data: {roomId: id} as RoomDetailDialogDate,
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.dir(result)
-      if(result){
-        this.router.navigate([id], {relativeTo: this.acRoute})
-      }
-    });
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
+
+  createRoom() {
+    this.subscriptions.push(this.apiService.createRoom().pipe(take(1)).subscribe((room) => {
+      this.router.navigate([room.id], { relativeTo: this.acRouter });
+    }));
+  }
+
 }

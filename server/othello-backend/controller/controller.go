@@ -48,7 +48,8 @@ func HandleCreateRoom(ctx *gin.Context) {
 		room:   room,
 	}
 
-	ctx.String(http.StatusCreated, room.UUID().String())
+	res := room_model.Room{Id: room.UUID().String(), Created: room.Created()}
+	ctx.JSON(http.StatusCreated, res)
 }
 
 /* 部屋取得 */
@@ -147,6 +148,8 @@ func makeMelodyHandler(m *melody.Melody) MelodyHandler {
 	res := MelodyHandler{
 		connectHandler: func(s *melody.Session) {
 			log.Printf("websocket connection open. [session: %#v]\n", s)
+
+			s.Write([]byte(""))
 		},
 		melodyHandler: func(s *melody.Session, msg []byte) {
 			m.Broadcast(msg)

@@ -1,0 +1,18 @@
+.game-board {
+  // height: 700px;
+
+  width:100%;
+  /* パディングの%指定は幅基準の為、
+     widthと同じ値を上部パディングに設定する  */
+  padding-top:100%;
+  position:relative;
+  /* お好みで以下入れる */
+  overflow:hidden;
+  .box {
+    position:absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    left:0;
+  }
+}

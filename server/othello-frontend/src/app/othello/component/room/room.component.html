@@ -1,5 +1,6 @@
-<p>room works!</p>
 <p>{{roomId}}</p>
-<button mat-raised-button (click)="onClick()">テスト</button>
-
-<app-game-board></app-game-board>
+<div class="game-board">
+  <div class="box">
+    <app-game-board [stone]="stone" (clickBoard)="clickBoard($event)"></app-game-board>
+  </div>
+</div>

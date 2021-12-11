@@ -1,3 +1,9 @@
+/** 碁石の種類 */
+export type StoneType = "Black" | "White" | "None";
+
+/** 座標 */
+export type Point = { x: number; y: number; };
+
 /** 参加待ち */
 export type Matching = "matching";
 /** 承認待ち */

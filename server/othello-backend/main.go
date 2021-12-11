@@ -28,6 +28,7 @@ func main() {
 var corsConfig = cors.New(cors.Config{
 	AllowOrigins: []string{
 		"http://localhost:4200",
+		"http://192.168.1.52:4200",
 	},
 	AllowMethods: []string{
 		"POST",

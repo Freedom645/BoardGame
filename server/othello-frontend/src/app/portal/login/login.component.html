@@ -1,0 +1,5 @@
+<mat-card class="card">
+  <h2>ログイン方法を選んでください</h2>
+  <firebase-ui (signInSuccessWithAuthResult)="successCallback($event)" (signInFailure)="errorCallback($event)">
+  </firebase-ui>
+</mat-card>

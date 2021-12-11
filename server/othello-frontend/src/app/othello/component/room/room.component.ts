@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { map, Subject } from 'rxjs';
 import { WebSocketService } from 'src/app/service/web-socket.service';
-import { GameRequestMessage, GameResponseMessage } from '../../model/game';
+import { GameRequestMessage, GameResponseMessage, Point, StoneType } from '../../model/game';
 
 @Component({
   selector: 'app-room',
@@ -11,6 +11,7 @@ import { GameRequestMessage, GameResponseMessage } from '../../model/game';
 })
 export class RoomComponent implements OnInit {
   roomId: string;
+  stone: StoneType[];
 
   private wsSubject;
 
@@ -19,6 +20,7 @@ export class RoomComponent implements OnInit {
     private webSocketService: WebSocketService
   ) {
     this.roomId = router.snapshot.params["id"];
+    this.stone = new Array(8 * 8).fill("None");
 
     this.wsSubject = this.webSocketService.connect<GameRequestMessage>(this.roomId);
     this.wsSubject.subscribe((res) => {
@@ -31,8 +33,8 @@ export class RoomComponent implements OnInit {
 
   }
 
-  onClick() {
-    this.wsSubject.next("test");
+  clickBoard(point: Point) {
+    this.wsSubject.next(`[${point.x},${point.y}]`);
   }
 
 }
