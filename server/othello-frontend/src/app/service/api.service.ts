@@ -1,32 +1,45 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { concatMap, map, Observable } from 'rxjs';
 import { Room } from '../othello/model/room';
 import { environment } from 'src/environments/environment';
-import { RoomComponent } from '../othello/component/room/room.component';
+import { AccountService } from './account.service';
 
 @Injectable()
 export class ApiService {
 
   private readonly URL = environment.api.http + environment.api.host;
-  private readonly HEADERS = this.makeHeader();
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private acc: AccountService,
   ) { }
 
-  private makeHeader(): HttpHeaders {
-    const header = new HttpHeaders();
-    header.append('Content-Type', 'application/x-www-form-urlencoded');
-    return new HttpHeaders();
+  private makeHeader(): Observable<HttpHeaders> {
+    return this.acc.getJwt().pipe(map(jwt => {
+      const header = new HttpHeaders()
+        // .append('Content-Type', 'application/x-www-form-urlencoded')
+        .append('Authorization', `Bearer ${jwt}`);
+      console.log("header");
+      console.dir(header);
+      return header;
+    }));
   }
 
-  private get<T>(url: string) {
-    return this.http.get<T>(url, { headers: this.HEADERS });
+  private get<T>(url: string): Observable<T> {
+    return this.makeHeader().pipe(
+      concatMap(headers => {
+        console.log("get");
+        console.dir(headers);
+        return this.http.get<T>(url, { headers });
+      })
+    );
   }
 
-  private post<T>(url: string) {
-    return this.http.post<T>(url, { headers: this.HEADERS });
+  private post<T>(url: string): Observable<T> {
+    return this.makeHeader().pipe(
+      concatMap(headers => this.http.post<T>(url, { headers }))
+    );
   }
 
   /** 部屋一覧を取得 */
@@ -39,7 +52,7 @@ export class ApiService {
     return this.get<Room>(`${this.URL}/room/${id}`);
   }
 
-  /** 部屋一覧を作成 */
+  /** 部屋を作成 */
   public createRoom(): Observable<Room> {
     return this.post<Room>(`${this.URL}/room`);
   }

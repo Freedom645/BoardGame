@@ -14,18 +14,30 @@
   .sidenav{
     width: var(--app-drawer-width, 256px);
   }
-  .sidenav-content {
-    max-width: 800px - 24px*2;
-    margin: 32px auto;
-    padding: 24px;
+  .wrapper {
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 120px;
+    box-sizing: border-box;
 
-    background-color: #303030;
+    .sidenav-content {
+      max-width: 800px - 24px*2;
+      margin: 32px auto;
+      padding: 24px;
+
+      background-color: #303030;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 0;
+
+      width: 100%;
+      height: 120px;
+      padding: 32px 0;
+
+      background-color: #3e3e3e;
+      color: #fff;
+    }
   }
-
-  .footer {
-    background-color: #3e3e3e;
-    padding: 32px 16px;
-    color: #fff;
-  }
-
 }

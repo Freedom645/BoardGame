@@ -42,4 +42,8 @@ export class RoomListComponent implements OnInit, OnDestroy {
     }));
   }
 
+  test() {
+    this.accService.getJwt();
+  }
+
 }

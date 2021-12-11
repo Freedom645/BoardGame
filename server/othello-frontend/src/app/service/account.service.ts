@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { map, Observable, take } from 'rxjs';
+import { concatMap, map, from, Observable, take, defer, of } from 'rxjs';
 
 @Injectable()
 export class AccountService {
@@ -34,5 +34,12 @@ export class AccountService {
 
   public logout(): Promise<void> {
     return this.afAuth.signOut();
+  }
+
+  public getJwt(): Observable<string> {
+    return this.afAuth.authState.pipe(concatMap((user) => {
+      return from(user?.getIdToken() ?? new Promise<string>(re => ""));
+    }
+    ));
   }
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/Freedom645/BoardGame/controller/middleware"
 	"github.com/Freedom645/BoardGame/controller/model/room_model"
 	"github.com/Freedom645/BoardGame/domain/room"
 	"github.com/Freedom645/BoardGame/service/room_service"
@@ -77,6 +78,12 @@ func HandleGetRoom(ctx *gin.Context) {
 
 /* 部屋一覧取得 */
 func HandleGetRoomList(ctx *gin.Context) {
+
+	obj, _ := ctx.Get("userInfo")
+	userInfo := obj.(middleware.UserInfo)
+
+	log.Printf("userID = %v", userInfo.Uid)
+
 	// 排他処理（書き込み）
 	melodyManager.locker.RLock()
 	defer melodyManager.locker.RUnlock()
