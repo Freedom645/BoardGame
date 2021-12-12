@@ -1,5 +1,5 @@
 import { Deserializer, Serializer } from "src/app/service/web-socket.service";
-import { Point, Stone, StoneType } from "./game";
+import { Board, Point, Stone, StoneType } from "./game";
 
 /** 参加待ち */
 export type Matching = "matching";
@@ -68,5 +68,7 @@ export interface GameOverRequest {
 export interface GameResponseMessage {
   /** ゲーム遷移状態 */
   step: GameStep;
+  /** 盤面状態 */
+  board: Board;
 };
 

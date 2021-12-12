@@ -39,14 +39,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.step = Step.Matching;
     this.roomId = router.snapshot.params["id"];
 
-    this.board = [];
-    for (let i = 0; i < GameLogicService.MassNum; i++) {
-      const row: StoneType[] = [];
-      for (let j = 0; j < GameLogicService.MassNum; j++) {
-        row.push(Stone.None);
-      }
-      this.board.push(row);
-    }
+    this.board = this.logic.newBoard();
 
     this.overlayRef = this.overlay.create({
       hasBackdrop: true,
@@ -75,17 +68,6 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   clickBoard(p: Point) {
     const value = this.requestService.requestGame(this.playerName, p);
-
-    this.board = [];
-    for (let i = 0; i < GameLogicService.MassNum; i++) {
-      const row: StoneType[] = [];
-      for (let j = 0; j < GameLogicService.MassNum; j++) {
-        const type = Math.random() > 0.5 ? Stone.None : Math.random() > 0.5 ? Stone.White : Stone.Black;
-        row.push(type);
-      }
-      this.board.push(row);
-    }
-
     this.sendMessage(value);
   }
 
@@ -94,7 +76,9 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   /** メッセージ受信 */
   private receiveMessage(msg: GameMessage) {
-    console.dir(msg);
+    this.step = msg.response?.step ?? Step.Matching;
+    this.board = msg.response?.board ?? this.logic.newBoard();
+
     switch (msg.response?.step) {
       case Step.Matching:
         return;

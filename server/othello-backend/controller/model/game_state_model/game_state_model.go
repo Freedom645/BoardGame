@@ -10,9 +10,9 @@ const (
 	/* ゲーム順番待ち */
 	Waiting GameState = "waiting"
 	/* 黒の番 */
-	BlackTurn GameState = "blackTurn"
+	BlackTurn GameState = "black"
 	/* 白の番 */
-	WhiteTurn GameState = "whiteTurn"
+	WhiteTurn GameState = "white"
 	/* ゲーム終了 */
 	GameOver GameState = "gameOver"
 	/* 継続待ち */

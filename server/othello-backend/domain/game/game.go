@@ -7,42 +7,42 @@ import (
 
 type Game struct {
 	/* 盤面状態 */
-	b *Board
+	Board *Board
 	/* 先攻プレイヤー */
-	first *player.Player
+	First *player.Player
 	/* 後攻プレイヤー */
-	second *player.Player
+	Second *player.Player
 	/* 状態 */
-	step gs.Step
+	Step gs.Step
 }
 
 func NewGame() *Game {
 	g := new(Game)
 
-	g.b = NewBoard()
-	g.step = gs.NotStarted
+	g.Board = NewBoard()
+	g.Step = gs.NotStarted
 
 	return g
 }
 
 func (g *Game) SetFirstPlayer(p player.Player) bool {
-	if g.first != nil {
+	if g.First != nil {
 		return false
 	}
 
-	g.first = &p
+	g.First = &p
 	return true
 }
 
 func (g *Game) SetSecondPlayer(p player.Player) bool {
-	if g.second != nil {
+	if g.Second != nil {
 		return false
 	}
 
-	g.second = &p
+	g.Second = &p
 	return true
 }
 
 func (g *Game) SetStep(step gs.Step) {
-	g.step = step
+	g.Step = step
 }

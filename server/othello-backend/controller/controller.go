@@ -1,11 +1,16 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"sync"
 
 	"github.com/Freedom645/BoardGame/controller/middleware"
+	"github.com/Freedom645/BoardGame/controller/model"
+	gameStateModel "github.com/Freedom645/BoardGame/controller/model/game_state_model"
 	"github.com/Freedom645/BoardGame/controller/model/room_model"
+	"github.com/Freedom645/BoardGame/domain/enum/stone_type"
+	"github.com/Freedom645/BoardGame/domain/game"
 	"github.com/Freedom645/BoardGame/domain/room"
 	"github.com/Freedom645/BoardGame/service/room_service"
 	"github.com/gin-gonic/gin"
@@ -156,7 +161,32 @@ func makeMelodyHandler(m *melody.Melody, room *room.Room) MelodyHandler {
 			s.Write([]byte(`"hello"`))
 		},
 		melodyHandler: func(s *melody.Session, msg []byte) {
-			m.Broadcast(msg)
+			var req model.GameMessage
+			if err := json.Unmarshal(msg, &req); err != nil {
+				log.Error(err)
+				return
+			}
+
+			pm := req.Request.Game.Point
+
+			err := room.Put(game.NewPoint(pm.X, pm.Y), stone_type.Black)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			res := model.GameResponseMessage{
+				State: gameStateModel.BlackTurn,
+				Board: room.Game.Board.Stones(),
+			}
+
+			d, err := json.Marshal(res)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			m.Broadcast([]byte(d))
 		},
 		disconnectHandler: func(s *melody.Session) {
 			log.Printf("websocket connection close. [session: %#v]\n", s)

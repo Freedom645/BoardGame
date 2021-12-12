@@ -21,6 +21,23 @@ export class GameLogicService {
 
   constructor() { }
 
+  /** 初期状態の盤面を返す */
+  public newBoard(): Board {
+    const res = new Array(GameLogicService.MassNum)
+      .fill(undefined)
+      .map(() =>
+        new Array(GameLogicService.MassNum)
+          .fill(undefined)
+          .map(() => Stone.None)
+      );
+
+    res[3][3] = Stone.Black;
+    res[3][4] = Stone.White;
+    res[4][3] = Stone.White;
+    res[4][4] = Stone.Black;
+    return res;
+  }
+
   /** 座標から連番へ変換 */
   public convertToIndex(point: Point): number {
     return point.y * GameLogicService.MassNum + point.x;

@@ -1,11 +1,11 @@
 package stone_type
 
-type StoneType int
+type StoneType string
 
 const (
-	None StoneType = iota
-	Black
-	White
+	None  StoneType = "none"
+	Black StoneType = "black"
+	White StoneType = "white"
 )
 
 func RevStone(s StoneType) StoneType {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Freedom645/BoardGame/domain/enum/stone_type"
 	st "github.com/Freedom645/BoardGame/domain/enum/stone_type"
 )
 
@@ -26,8 +27,18 @@ func NewBoard() *Board {
 	for i := 0; i < b.Height(); i++ {
 		b.stones[i] = make([]st.StoneType, b.Width())
 	}
+	b.Fill(st.None)
+
+	b.stones[3][3] = stone_type.Black
+	b.stones[4][4] = stone_type.Black
+	b.stones[3][4] = stone_type.White
+	b.stones[4][3] = stone_type.White
 
 	return b
+}
+
+func (b *Board) Stones() [][]st.StoneType {
+	return b.stones
 }
 
 /* 盤面の縦幅を取得 */

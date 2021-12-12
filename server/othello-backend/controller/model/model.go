@@ -3,7 +3,7 @@ package model
 import (
 	gc "github.com/Freedom645/BoardGame/controller/model/game_color_model"
 	gs "github.com/Freedom645/BoardGame/controller/model/game_state_model"
-	"github.com/google/uuid"
+	"github.com/Freedom645/BoardGame/domain/enum/stone_type"
 )
 
 type GameMessage struct {
@@ -12,12 +12,15 @@ type GameMessage struct {
 }
 
 type GameRequestMessage struct {
-	UUID     uuid.UUID `json:"uuid"`
-	UserName string    `json:"userName"`
+	PlayerName string          `json:"playerName"`
+	Pending    PendingRequest  `json:"pending"`
+	Game       GameRequest     `json:"game"`
+	GameOver   GameOverRequest `json:"gameOver"`
 }
 
 type GameResponseMessage struct {
-	State gs.GameState `json:"state"`
+	State gs.GameState             `json:"state"`
+	Board [][]stone_type.StoneType `json:"board"`
 }
 
 /* 参加待ちのサーバ通知 */
@@ -27,9 +30,7 @@ type MatchingResponse struct {
 
 /* 承認待ちのリクエスト */
 type PendingRequest struct {
-	IsApproved bool      `json:"isApproved"`
-	UUID       uuid.UUID `json:"uuid"`
-	UserName   string    `json:"userName"`
+	IsApproved bool `json:"isApproved"`
 }
 
 /* 承認待ちのレスポンス */
@@ -39,7 +40,15 @@ type PendingResponse struct {
 	Turn       gc.GameColor `json:"turn"`
 }
 
-/* 順番待機のレスポンス */
-type WatingResponse struct {
-	Turn gc.GameColor `json:"turn"`
+type Point struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
+type GameRequest struct {
+	Point Point `json:"point"`
+}
+
+type GameOverRequest struct {
+	IsContinued bool `json:"isContinued"`
 }
