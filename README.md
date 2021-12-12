@@ -1,15 +1,15 @@
-
-イメージのビルド
-```powershell
-docker build --rm .\server\brainfuck-runtime\ -t brainfuck-runtime-front
-```
-
+## Dockerコマンド
 起動
-```powershell
+```shell
 docker-compose up -d
 ```
 
-フロント接続
-```powershell
-docker-compose exec brainfuck-runtime-front bash
+バックエンド接続
+```shell
+docker-compose exec othello-backend bash
+```
+
+フロントエンド接続
+```shell
+docker-compose exec othello-frontend bash
 ```
