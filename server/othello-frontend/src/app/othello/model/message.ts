@@ -1,5 +1,5 @@
 import { Deserializer, Serializer } from "src/app/service/web-socket.service";
-import { Point, StoneType } from "./game";
+import { Point, Stone, StoneType } from "./game";
 
 /** 参加待ち */
 export type Matching = "matching";
@@ -11,6 +11,25 @@ export type Waiting = "waiting";
 export type GameOver = "gameOver";
 /** 継続待ち */
 export type Continue = "continue";
+
+/** 定数  */
+export const Step = {
+  Matching: "matching",
+  Pending: "pending",
+  Waiting: "waiting",
+  Black: Stone.Black,
+  White: Stone.White,
+  GameOver: "gameOver",
+  Continue: "continue",
+} as {
+  Matching: Matching,
+  Pending: Pending,
+  Waiting: Waiting,
+  Black: StoneType,
+  White: StoneType,
+  GameOver: GameOver,
+  Continue: Continue,
+};
 
 /** ゲーム遷移状態 */
 export type GameStep = Matching | Pending | Waiting | StoneType | GameOver | Continue;

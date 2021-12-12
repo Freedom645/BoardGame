@@ -1,6 +1,8 @@
 <p>{{roomId}}</p>
+<p>{{step}}</p>
+<button mat-button (click)="test()">Test</button>
 <div class="game-board">
   <div class="box">
-    <app-game-board [stone]="stone" (clickBoard)="clickBoard($event)"></app-game-board>
+    <app-game-board [input]="board" (clickBoard)="clickBoard($event)"></app-game-board>
   </div>
 </div>

@@ -10,6 +10,8 @@ import { RoomComponent } from './component/room/room.component';
 import { GameBoardComponent } from './component/room/game-board/game-board.component';
 import { RoomTableComponent } from './component/room-list/room-table/room-table.component';
 import { ResizeService } from '../service/resize.service';
+import { RequestService } from './service/request.service';
+import { GameLogicService } from './service/game-logic.service';
 
 
 
@@ -30,6 +32,8 @@ import { ResizeService } from '../service/resize.service';
     ApiService,
     WebSocketService,
     ResizeService,
+    RequestService,
+    GameLogicService,
   ],
 })
 export class OthelloModule { }

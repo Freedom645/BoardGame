@@ -1,5 +1,6 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { Point, StoneType } from 'src/app/othello/model/game';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Board, Mass, Point, Stone, StoneType } from 'src/app/othello/model/game';
+import { GameLogicService } from 'src/app/othello/service/game-logic.service';
 import { ResizeService } from 'src/app/service/resize.service';
 
 interface BoardMass {
@@ -28,15 +29,20 @@ interface Stone {
   templateUrl: './game-board.component.html',
   styleUrls: ['./game-board.component.scss']
 })
-export class GameBoardComponent implements OnInit, AfterViewInit {
+export class GameBoardComponent implements OnInit, AfterViewInit, OnChanges {
   @ViewChild('svg') svgElement!: ElementRef<SVGElement>;
 
   readonly boardMass = 8;
+  readonly Black = Stone.Black;
+  readonly White = Stone.White;
+
   boardPanel: BoardMass[];
   coverPanel: BoardCover[];
   stonePanel: Stone[];
 
-  @Input() stone: StoneType[];
+  stone: StoneType[];
+
+  @Input() input!: Board;
   @Output() clickBoard = new EventEmitter<Point>();
 
   size: number = 50;
@@ -53,11 +59,12 @@ export class GameBoardComponent implements OnInit, AfterViewInit {
 
   constructor(
     private resizeService: ResizeService,
+    private logic: GameLogicService,
   ) {
     this.boardPanel = [];
     this.coverPanel = [];
     this.stonePanel = [];
-    this.stone = [];
+    this.stone = new Array<StoneType>(GameLogicService.MassNum * GameLogicService.MassNum).fill(Stone.None);
 
     this.initializeBoard();
     this.resizeService.size.subscribe((_) => {
@@ -119,21 +126,28 @@ export class GameBoardComponent implements OnInit, AfterViewInit {
     this.resize();
   }
 
-  change(index: number) {
-    if (this.stone[index] != "none") {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes["input"]) {
+      const size = GameLogicService.MassNum;
+      for (let i = 0; i < size * size; i++) {
+        this.stone[i] = this.logic.getType(this.input, i);
+      }
+    }
+  }
+
+  clickMass(index: number) {
+    if (this.stone[index] != Stone.None) {
       return;
     }
 
     const x = index % this.boardMass;
     const y = Math.floor(index / this.boardMass);
     this.clickBoard.emit({ x, y });
-
-    this.stone[index] = Math.random() > 0.5 ? "white" : "black";
     this.changeCover(index, 0);
   }
 
   mouseover(index: number) {
-    if (this.stone[index] != "none") {
+    if (this.stone[index] != Stone.None) {
       return;
     }
     this.changeCover(index, 0.5);
