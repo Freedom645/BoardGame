@@ -12,6 +12,8 @@ import { RoomTableComponent } from './component/room-list/room-table/room-table.
 import { ResizeService } from '../service/resize.service';
 import { RequestService } from './service/request.service';
 import { GameLogicService } from './service/game-logic.service';
+import { GameStepComponent } from './component/room/game-step/game-step.component';
+import { MatchingDialogComponent } from './component/room/matching-dialog/matching-dialog.component';
 
 
 
@@ -21,7 +23,9 @@ import { GameLogicService } from './service/game-logic.service';
     RoomDetailComponent,
     RoomComponent,
     GameBoardComponent,
-    RoomTableComponent
+    RoomTableComponent,
+    GameStepComponent,
+    MatchingDialogComponent
   ],
   imports: [
     CommonModule,

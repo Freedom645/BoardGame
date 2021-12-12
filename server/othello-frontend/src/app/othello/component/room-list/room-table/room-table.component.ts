@@ -33,7 +33,6 @@ export class RoomTableComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.dir(result);
       if (result) {
         this.router.navigate([id], { relativeTo: this.acRoute });
       }

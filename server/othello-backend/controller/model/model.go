@@ -19,7 +19,7 @@ type GameRequestMessage struct {
 }
 
 type GameResponseMessage struct {
-	State gs.GameState             `json:"state"`
+	Step  gs.GameState             `json:"step"`
 	Board [][]stone_type.StoneType `json:"board"`
 }
 

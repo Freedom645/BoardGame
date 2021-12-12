@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { concatMap, map, from, Observable, take, defer, of } from 'rxjs';
+import { concatMap, map, from, Observable, take, of } from 'rxjs';
 
 @Injectable()
 export class AccountService {
@@ -23,9 +23,7 @@ export class AccountService {
   public getUsername(): Observable<string> {
     return this.afAuth.user.pipe(
       map((user) => user?.displayName),
-      concatMap((name) => {
-        return name ?? this.getUid().pipe(map(uid => "Guest_" + uid.substring(0, 8)));
-      })
+      concatMap((name) => name ? of(name) : this.getUid().pipe(map(uid => "Guest_" + uid.substring(0, 8))))
     );
   }
 
@@ -46,3 +44,5 @@ export class AccountService {
     ));
   }
 }
+
+

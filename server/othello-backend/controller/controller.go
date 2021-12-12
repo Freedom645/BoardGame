@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -156,14 +157,27 @@ type MelodyHandler struct {
 func makeMelodyHandler(m *melody.Melody, room *room.Room) MelodyHandler {
 	res := MelodyHandler{
 		connectHandler: func(s *melody.Session) {
-			log.Printf("websocket connection open. [session: %#v]\n", s)
+			log.Printf("websocket connection open.\n")
 
-			s.Write([]byte(`"hello"`))
+			res := model.GameMessage{
+				Response: model.GameResponseMessage{
+					Step:  gameStateModel.BlackTurn,
+					Board: room.Game.Board.Stones(),
+				},
+			}
+
+			d, err := json.Marshal(res)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			s.Write([]byte(d))
 		},
 		melodyHandler: func(s *melody.Session, msg []byte) {
 			var req model.GameMessage
 			if err := json.Unmarshal(msg, &req); err != nil {
-				log.Error(err)
+				s.Write([]byte(`"invalid format"`))
 				return
 			}
 
@@ -171,13 +185,15 @@ func makeMelodyHandler(m *melody.Melody, room *room.Room) MelodyHandler {
 
 			err := room.Put(game.NewPoint(pm.X, pm.Y), stone_type.Black)
 			if err != nil {
-				log.Error(err)
+				s.Write([]byte(fmt.Sprintf(`"%s"`, err.Error())))
 				return
 			}
 
-			res := model.GameResponseMessage{
-				State: gameStateModel.BlackTurn,
-				Board: room.Game.Board.Stones(),
+			res := model.GameMessage{
+				Response: model.GameResponseMessage{
+					Step:  gameStateModel.BlackTurn,
+					Board: room.Game.Board.Stones(),
+				},
 			}
 
 			d, err := json.Marshal(res)
@@ -189,7 +205,7 @@ func makeMelodyHandler(m *melody.Melody, room *room.Room) MelodyHandler {
 			m.Broadcast([]byte(d))
 		},
 		disconnectHandler: func(s *melody.Session) {
-			log.Printf("websocket connection close. [session: %#v]\n", s)
+			log.Printf("websocket connection close.\n")
 		},
 	}
 

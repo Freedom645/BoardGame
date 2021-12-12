@@ -31,10 +31,6 @@ export class GameLogicService {
           .map(() => Stone.None)
       );
 
-    res[3][3] = Stone.Black;
-    res[3][4] = Stone.White;
-    res[4][3] = Stone.White;
-    res[4][4] = Stone.Black;
     return res;
   }
 
