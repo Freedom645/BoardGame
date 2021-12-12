@@ -2,13 +2,12 @@ package game
 
 import (
 	gs "github.com/Freedom645/BoardGame/domain/enum/game_step"
-	"github.com/Freedom645/BoardGame/domain/game/board"
 	"github.com/Freedom645/BoardGame/domain/player"
 )
 
 type Game struct {
 	/* 盤面状態 */
-	b *board.Board
+	b *Board
 	/* 先攻プレイヤー */
 	first *player.Player
 	/* 後攻プレイヤー */
@@ -20,7 +19,7 @@ type Game struct {
 func NewGame() *Game {
 	g := new(Game)
 
-	g.b = board.NewBoard()
+	g.b = NewBoard()
 	g.step = gs.NotStarted
 
 	return g

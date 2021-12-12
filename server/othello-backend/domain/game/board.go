@@ -1,11 +1,10 @@
-package board
+package game
 
 import (
 	"errors"
 	"fmt"
 
 	st "github.com/Freedom645/BoardGame/domain/enum/stone_type"
-	"github.com/Freedom645/BoardGame/domain/game/point"
 )
 
 const (
@@ -14,14 +13,14 @@ const (
 )
 
 type Board struct {
-	size   point.Point
+	size   Point
 	stones [][]st.StoneType
 }
 
 func NewBoard() *Board {
 	b := new(Board)
 
-	b.size = point.NewPoint(WidthLim, HeightLim)
+	b.size = NewPoint(WidthLim, HeightLim)
 
 	b.stones = make([][]st.StoneType, b.Height())
 	for i := 0; i < b.Height(); i++ {
@@ -42,45 +41,45 @@ func (b *Board) Width() int {
 }
 
 /* 左上 */
-func (b *Board) TopLeft() point.Point {
-	return point.Zero()
+func (b *Board) TopLeft() Point {
+	return Zero()
 }
 
 /* 右上 */
-func (b *Board) TopRight() point.Point {
-	return point.NewPoint(WidthLim-1, 0)
+func (b *Board) TopRight() Point {
+	return NewPoint(WidthLim-1, 0)
 }
 
 /* 左下 */
-func (b *Board) BottomLeft() point.Point {
-	return point.NewPoint(0, HeightLim-1)
+func (b *Board) BottomLeft() Point {
+	return NewPoint(0, HeightLim-1)
 }
 
 /* 右下 */
-func (b *Board) BottomRight() point.Point {
-	return point.NewPoint(WidthLim-1, HeightLim-1)
+func (b *Board) BottomRight() Point {
+	return NewPoint(WidthLim-1, HeightLim-1)
 }
 
 /* 盤面内判定 */
-func (b *Board) Contain(p point.Point) bool {
-	zero := point.Zero()
+func (b *Board) Contain(p Point) bool {
+	zero := Zero()
 	return zero.Less(p) && p.LessThan(b.size)
 }
 
 /* 盤面情報を参照 */
-func (b *Board) TypeAt(p point.Point) st.StoneType {
+func (b *Board) TypeAt(p Point) st.StoneType {
 	return b.stones[p.Y()][p.X()]
 }
 
 /* 反転する護石の座標を取得 */
-func (b *Board) PutIf(p point.Point, stone st.StoneType) []point.Point {
-	DIR := point.ConstDir8()
+func (b *Board) PutIf(p Point, stone st.StoneType) []Point {
+	DIR := ConstDir8()
 
 	if !b.Contain(p) {
 		panic(fmt.Sprintf("out range [%d, %d]", p.X(), p.Y()))
 	}
 
-	var res = make([]point.Point, 0)
+	var res = make([]Point, 0)
 	for _, v := range DIR {
 		list, err := b.searchReversePoint(p, stone, v)
 		if err != nil {
@@ -94,8 +93,8 @@ func (b *Board) PutIf(p point.Point, stone st.StoneType) []point.Point {
 }
 
 /* 一方向への返せる石の座標を探索 */
-func (b *Board) searchReversePoint(base point.Point, stone st.StoneType, vector point.Point) ([]point.Point, error) {
-	var res []point.Point
+func (b *Board) searchReversePoint(base Point, stone st.StoneType, vector Point) ([]Point, error) {
+	var res []Point
 	for i := 1; ; i++ {
 		p := base.Plus(vector.Product(i))
 		if !b.Contain(p) {
@@ -115,7 +114,7 @@ func (b *Board) searchReversePoint(base point.Point, stone st.StoneType, vector 
 }
 
 /* リストの座標に従い石を置く */
-func (b *Board) Put(list *[]point.Point, stone st.StoneType) int {
+func (b *Board) Put(list *[]Point, stone st.StoneType) int {
 	var res int = 0
 	for _, p := range *list {
 		if b.PutOne(p, stone) {
@@ -127,7 +126,7 @@ func (b *Board) Put(list *[]point.Point, stone st.StoneType) int {
 }
 
 /* 1箇所に石を置く */
-func (b *Board) PutOne(p point.Point, stone st.StoneType) bool {
+func (b *Board) PutOne(p Point, stone st.StoneType) bool {
 	res := b.TypeAt(p) == st.RevStone(stone)
 	b.stones[p.Y()][p.X()] = stone
 	return res

@@ -1,4 +1,4 @@
-package point
+package game
 
 type Point struct {
 	x int

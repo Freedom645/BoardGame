@@ -1,11 +1,10 @@
-package board
+package game
 
 import (
 	"reflect"
 	"testing"
 
 	st "github.com/Freedom645/BoardGame/domain/enum/stone_type"
-	point "github.com/Freedom645/BoardGame/domain/game/point"
 )
 
 func TestNewBoard(t *testing.T) {
@@ -61,7 +60,7 @@ func TestBoard_Width(t *testing.T) {
 func TestBoard_Contain(t *testing.T) {
 	board := NewBoard()
 	type args struct {
-		p point.Point
+		p Point
 	}
 	tests := []struct {
 		name string
@@ -69,22 +68,22 @@ func TestBoard_Contain(t *testing.T) {
 		args args
 		want bool
 	}{
-		{"top left is true", board, args{point.Zero()}, true},
+		{"top left is true", board, args{Zero()}, true},
 		{"top right is true", board, args{board.TopRight()}, true},
-		{"bottom left is true", board, args{point.NewPoint(0, HeightLim-1)}, true},
-		{"bottom right is true", board, args{point.NewPoint(WidthLim-1, HeightLim-1)}, true},
+		{"bottom left is true", board, args{NewPoint(0, HeightLim-1)}, true},
+		{"bottom right is true", board, args{NewPoint(WidthLim-1, HeightLim-1)}, true},
 
-		{"top left +up is false", board, args{point.Up()}, false},
-		{"top left +left is false", board, args{point.Left()}, false},
+		{"top left +up is false", board, args{Up()}, false},
+		{"top left +left is false", board, args{Left()}, false},
 
-		{"top right +up is false", board, args{point.Add(point.NewPoint(WidthLim-1, 0), point.Up())}, false},
-		{"top right +right is false", board, args{point.Add(point.NewPoint(WidthLim-1, 0), point.Right())}, false},
+		{"top right +up is false", board, args{Add(NewPoint(WidthLim-1, 0), Up())}, false},
+		{"top right +right is false", board, args{Add(NewPoint(WidthLim-1, 0), Right())}, false},
 
-		{"bottom left +down is false", board, args{point.Add(point.NewPoint(0, HeightLim-1), point.Down())}, false},
-		{"bottom left +left is false", board, args{point.Add(point.NewPoint(0, HeightLim-1), point.Left())}, false},
+		{"bottom left +down is false", board, args{Add(NewPoint(0, HeightLim-1), Down())}, false},
+		{"bottom left +left is false", board, args{Add(NewPoint(0, HeightLim-1), Left())}, false},
 
-		{"bottom right +down is false", board, args{point.Add(point.NewPoint(WidthLim-1, HeightLim-1), point.Down())}, false},
-		{"bottom right +right is false", board, args{point.Add(point.NewPoint(WidthLim-1, HeightLim-1), point.Right())}, false},
+		{"bottom right +down is false", board, args{Add(NewPoint(WidthLim-1, HeightLim-1), Down())}, false},
+		{"bottom right +right is false", board, args{Add(NewPoint(WidthLim-1, HeightLim-1), Right())}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -98,7 +97,7 @@ func TestBoard_Contain(t *testing.T) {
 func TestBoard_TypeAt(t *testing.T) {
 	board := NewBoard()
 	type args struct {
-		p point.Point
+		p Point
 	}
 	tests := []struct {
 		name string
@@ -106,10 +105,10 @@ func TestBoard_TypeAt(t *testing.T) {
 		args args
 		want st.StoneType
 	}{
-		{"top left is true", board, args{point.Zero()}, st.None},
-		{"top right is true", board, args{point.NewPoint(WidthLim-1, 0)}, st.None},
-		{"bottom left is true", board, args{point.NewPoint(0, HeightLim-1)}, st.None},
-		{"bottom right is true", board, args{point.NewPoint(WidthLim-1, HeightLim-1)}, st.None},
+		{"top left is true", board, args{Zero()}, st.None},
+		{"top right is true", board, args{NewPoint(WidthLim-1, 0)}, st.None},
+		{"bottom left is true", board, args{NewPoint(0, HeightLim-1)}, st.None},
+		{"bottom right is true", board, args{NewPoint(WidthLim-1, HeightLim-1)}, st.None},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -127,25 +126,25 @@ func TestBoard_PutIf(t *testing.T) {
 
 	// 右上/左下
 	trAndbl := NewBoard().Fill(st.White)
-	trAndbl.Put(&[]point.Point{trAndbl.TopRight(), trAndbl.BottomLeft()}, st.Black)
+	trAndbl.Put(&[]Point{trAndbl.TopRight(), trAndbl.BottomLeft()}, st.Black)
 
 	type args struct {
-		p     point.Point
+		p     Point
 		stone st.StoneType
 	}
 	tests := []struct {
 		name string
 		b    *Board
 		args args
-		want []point.Point
+		want []Point
 	}{
-		{"put stone on [0,0] of empty board is noting", empty, args{point.Zero(), st.Black}, []point.Point{}},
+		{"put stone on [0,0] of empty board is noting", empty, args{Zero(), st.Black}, []Point{}},
 
-		{"put stone on [2,0] of topLeft board is [1,0]", tl, args{point.NewPoint(2, 0), st.Black}, []point.Point{point.NewPoint(1, 0)}},
-		{"put stone on [0,2] of topLeft board is [0,1]", tl, args{point.NewPoint(0, 2), st.Black}, []point.Point{point.NewPoint(0, 1)}},
-		{"put stone on [2,2] of topLeft board is [1,1]", tl, args{point.NewPoint(2, 2), st.Black}, []point.Point{point.NewPoint(1, 1)}},
+		{"put stone on [2,0] of topLeft board is [1,0]", tl, args{NewPoint(2, 0), st.Black}, []Point{NewPoint(1, 0)}},
+		{"put stone on [0,2] of topLeft board is [0,1]", tl, args{NewPoint(0, 2), st.Black}, []Point{NewPoint(0, 1)}},
+		{"put stone on [2,2] of topLeft board is [1,1]", tl, args{NewPoint(2, 2), st.Black}, []Point{NewPoint(1, 1)}},
 
-		{"put stone on TR +down*2 of TR and BL board is TR +down", trAndbl, args{point.Add(trAndbl.TopRight(), point.Down(), point.Down()), st.Black}, []point.Point{point.Add(trAndbl.TopRight(), point.Down())}},
+		{"put stone on TR +down*2 of TR and BL board is TR +down", trAndbl, args{Add(trAndbl.TopRight(), Down(), Down()), st.Black}, []Point{Add(trAndbl.TopRight(), Down())}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -158,15 +157,15 @@ func TestBoard_PutIf(t *testing.T) {
 
 func TestBoard_searchReversePoint(t *testing.T) {
 	type args struct {
-		base   point.Point
+		base   Point
 		stone  st.StoneType
-		vector point.Point
+		vector Point
 	}
 	tests := []struct {
 		name    string
 		b       *Board
 		args    args
-		want    []point.Point
+		want    []Point
 		wantErr bool
 	}{
 		// TODO: Add test cases.
@@ -187,7 +186,7 @@ func TestBoard_searchReversePoint(t *testing.T) {
 
 func TestBoard_Put(t *testing.T) {
 	type args struct {
-		list  *[]point.Point
+		list  *[]Point
 		stone st.StoneType
 	}
 	tests := []struct {
@@ -209,7 +208,7 @@ func TestBoard_Put(t *testing.T) {
 
 func TestBoard_PutOne(t *testing.T) {
 	type args struct {
-		p     point.Point
+		p     Point
 		stone st.StoneType
 	}
 	tests := []struct {
