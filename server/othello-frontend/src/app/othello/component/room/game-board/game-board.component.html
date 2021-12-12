@@ -11,9 +11,9 @@
     </ng-container>
     <ng-container *ngFor="let st of stonePanel; index as i">
 
-      <svg:circle *ngIf="stone[i] == 'Black'" [attr.cx]="st.x" [attr.cy]="st.y" [attr.r]="st.r" fill="black"
+      <svg:circle *ngIf="stone[i] == 'black'" [attr.cx]="st.x" [attr.cy]="st.y" [attr.r]="st.r" fill="black"
                   stroke="white" [attr.stroke-width]="st.strokeWidth" />
-      <svg:circle *ngIf="stone[i] == 'White'" [attr.cx]="st.x" [attr.cy]="st.y" [attr.r]="st.r" fill="white"
+      <svg:circle *ngIf="stone[i] == 'white'" [attr.cx]="st.x" [attr.cy]="st.y" [attr.r]="st.r" fill="white"
                   stroke="black" [attr.stroke-width]="st.strokeWidth" />
     </ng-container>
   </svg:g>

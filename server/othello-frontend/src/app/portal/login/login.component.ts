@@ -22,12 +22,11 @@ export class LoginComponent implements OnInit {
   }
 
   successCallback(signInSuccessData: FirebaseUISignInSuccessWithAuthResult) {
-    console.log(signInSuccessData);
-
     this.route.navigate(["othello", "room"]);
   }
 
   async errorCallback(errorData: FirebaseUISignInFailure) {
+    // ログインエラー
     console.log(errorData);
   }
 

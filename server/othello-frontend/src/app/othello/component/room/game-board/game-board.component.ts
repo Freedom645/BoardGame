@@ -120,7 +120,7 @@ export class GameBoardComponent implements OnInit, AfterViewInit {
   }
 
   change(index: number) {
-    if (this.stone[index] != "None") {
+    if (this.stone[index] != "none") {
       return;
     }
 
@@ -128,12 +128,12 @@ export class GameBoardComponent implements OnInit, AfterViewInit {
     const y = Math.floor(index / this.boardMass);
     this.clickBoard.emit({ x, y });
 
-    this.stone[index] = Math.random() > 0.5 ? "White" : "Black";
+    this.stone[index] = Math.random() > 0.5 ? "white" : "black";
     this.changeCover(index, 0);
   }
 
   mouseover(index: number) {
-    if (this.stone[index] != "None") {
+    if (this.stone[index] != "none") {
       return;
     }
     this.changeCover(index, 0.5);

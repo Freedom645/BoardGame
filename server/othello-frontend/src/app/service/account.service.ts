@@ -22,7 +22,10 @@ export class AccountService {
 
   public getUsername(): Observable<string> {
     return this.afAuth.user.pipe(
-      map((user) => user?.displayName ?? "Guest")
+      map((user) => user?.displayName),
+      concatMap((name) => {
+        return name ?? this.getUid().pipe(map(uid => "Guest_" + uid.substring(0, 8)));
+      })
     );
   }
 
