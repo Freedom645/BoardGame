@@ -18,27 +18,20 @@ export class ApiService {
   private makeHeader(): Observable<HttpHeaders> {
     return this.acc.getJwt().pipe(map(jwt => {
       const header = new HttpHeaders()
-        // .append('Content-Type', 'application/x-www-form-urlencoded')
         .append('Authorization', `Bearer ${jwt}`);
-      console.log("header");
-      console.dir(header);
       return header;
     }));
   }
 
   private get<T>(url: string): Observable<T> {
     return this.makeHeader().pipe(
-      concatMap(headers => {
-        console.log("get");
-        console.dir(headers);
-        return this.http.get<T>(url, { headers });
-      })
+      concatMap(headers => this.http.get<T>(url, { headers: headers }))
     );
   }
 
-  private post<T>(url: string): Observable<T> {
+  private post<T>(url: string, body: any): Observable<T> {
     return this.makeHeader().pipe(
-      concatMap(headers => this.http.post<T>(url, { headers }))
+      concatMap(headers => this.http.post<T>(url, body, { headers: headers }))
     );
   }
 
@@ -53,7 +46,7 @@ export class ApiService {
   }
 
   /** 部屋を作成 */
-  public createRoom(): Observable<Room> {
-    return this.post<Room>(`${this.URL}/room`);
+  public createRoom(body?: any): Observable<Room> {
+    return this.post<Room>(`${this.URL}/room`, body ?? {});
   }
 }

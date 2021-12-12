@@ -16,12 +16,14 @@ type UserInfo struct {
 	Uid string
 }
 
+/* 認証情報取得用のミドルウェア */
 func BearerMiddleware(fireApp *firebase.App) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := verifyIDToken(ctx, fireApp)
 
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 
 		userInfo := UserInfo{
@@ -41,7 +43,7 @@ func verifyIDToken(ctx *gin.Context, app *firebase.App) (*auth.Token, error) {
 		return nil, err
 	}
 
-	idToken, err := parseHeader(ctx)
+	idToken, err := exactToken(ctx)
 	if err != nil {
 		log.Error("error parse header: %v\n", err)
 		return nil, err
@@ -56,7 +58,16 @@ func verifyIDToken(ctx *gin.Context, app *firebase.App) (*auth.Token, error) {
 	return token, nil
 }
 
-func parseHeader(ctx *gin.Context) (string, error) {
+func exactToken(ctx *gin.Context) (string, error) {
+	idToken, err := parseBearerHeader(ctx)
+	if err == nil {
+		return idToken, err
+	}
+
+	return parseWebSocketProtocol(ctx)
+}
+
+func parseBearerHeader(ctx *gin.Context) (string, error) {
 	header := ctx.Request.Header.Values("Authorization")
 	if len(header) == 0 {
 		return "", errors.New("the header format is invalid")
@@ -71,4 +82,13 @@ func parseHeader(ctx *gin.Context) (string, error) {
 	}
 
 	return values[1], nil
+}
+
+func parseWebSocketProtocol(ctx *gin.Context) (string, error) {
+	header := ctx.Request.Header.Values("Sec-WebSocket-Protocol")
+	if len(header) == 0 {
+		return "", errors.New("the header format is invalid")
+	}
+
+	return header[0], nil
 }

@@ -18,7 +18,6 @@ import (
 type socketStruct struct {
 	melody *melody.Melody
 	room   *room.Room
-	locker sync.RWMutex
 }
 
 /* WebSocketコネクション */
@@ -39,7 +38,7 @@ func HandleCreateRoom(ctx *gin.Context) {
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
-	melody := newMelody()
+	melody := newMelody(room)
 
 	melodyManager.locker.Lock()
 	defer melodyManager.locker.Unlock()
@@ -67,9 +66,6 @@ func HandleGetRoom(ctx *gin.Context) {
 
 	socket := melodyManager.sockets[roomId]
 
-	socket.locker.RLock()
-	defer socket.locker.RUnlock()
-
 	room := socket.room
 	res := room_model.Room{Id: room.UUID().String(), Created: room.Created()}
 	ctx.JSON(http.StatusOK, res)
@@ -90,9 +86,6 @@ func HandleGetRoomList(ctx *gin.Context) {
 
 	var res = []room_model.Room{}
 	for _, v := range melodyManager.sockets {
-		v.locker.RLock()
-		defer v.locker.RUnlock()
-
 		room := v.room
 		model := room_model.Room{Id: room.UUID().String(), Created: room.Created()}
 
@@ -111,7 +104,11 @@ func HandleConnect(ctx *gin.Context) {
 		return
 	}
 
+	// TODO デッドロックの危険性
+	melodyManager.locker.RLock()
 	socket := melodyManager.sockets[roomId]
+	melodyManager.locker.RUnlock()
+
 	if socket == nil {
 		// 400 存在しない部屋ID
 		ctx.String(http.StatusBadRequest, "room ID [%s] dose not exists.", roomId.String())
@@ -128,10 +125,10 @@ func HandleConnect(ctx *gin.Context) {
 	}
 }
 
-/* メロディ作成 */
-func newMelody() *melody.Melody {
+/* メロディ(WebConnection部屋)作成 */
+func newMelody(room *room.Room) *melody.Melody {
 	m := melody.New()
-	handlers := makeMelodyHandler(m)
+	handlers := makeMelodyHandler(m, room)
 
 	m.HandleConnect(handlers.connectHandler)
 	m.HandleMessage(handlers.melodyHandler)
@@ -151,12 +148,12 @@ type MelodyHandler struct {
 }
 
 /* メロディハンドラ作成 */
-func makeMelodyHandler(m *melody.Melody) MelodyHandler {
+func makeMelodyHandler(m *melody.Melody, room *room.Room) MelodyHandler {
 	res := MelodyHandler{
 		connectHandler: func(s *melody.Session) {
 			log.Printf("websocket connection open. [session: %#v]\n", s)
 
-			s.Write([]byte(""))
+			s.Write([]byte(`"hello"`))
 		},
 		melodyHandler: func(s *melody.Session, msg []byte) {
 			m.Broadcast(msg)
