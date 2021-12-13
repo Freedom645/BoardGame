@@ -1,27 +1,30 @@
-<p>{{roomId}}</p>
-<button mat-button (click)="test()">Test</button>
-
-<app-game-step [step]="step"></app-game-step>
-
-<mat-stepper linear="true" [selected]="gameStep" [disableRipple]="true" #stepper>
-  <mat-step state="matching" #matchingStep>
-    <ng-template matStepLabel>Matching</ng-template>
-
+<mat-stepper [selectedIndex]="2" [disableRipple]="true" #stepper>
+  <mat-step state="matching" #matchingStep [completed]="false">
+    <ng-template matStepLabel>待機</ng-template>
+    <div class="wrapper">
+      <div class="box">
+        <app-matching [roomId]="roomId" [playerName]="playerName" [opponentPlayer]="opponentPlayer"></app-matching>
+      </div>
+    </div>
   </mat-step>
 
-  <mat-step state="game" #gameStep>
-    <ng-template matStepLabel>Game</ng-template>
-
-    <div class="game-board" #gameBoardStep>
+  <mat-step state="game" #gameStep [completed]="false">
+    <ng-template matStepLabel>対局</ng-template>
+    <app-game-step [step]="step"></app-game-step>
+    <div class="wrapper">
       <div class="box">
         <app-game-board [input]="board" (clickBoard)="clickBoard($event)"></app-game-board>
       </div>
     </div>
   </mat-step>
 
-  <mat-step state="gameOver" #gameOverStep>
-    <ng-template matStepLabel>Game Over</ng-template>
-
+  <mat-step state="gameOver" #gameOverStep [completed]="false">
+    <ng-template matStepLabel>閉局</ng-template>
+    <div class="wrapper">
+      <div class="box">
+        <app-game-over></app-game-over>
+      </div>
+    </div>
   </mat-step>
 
 </mat-stepper>

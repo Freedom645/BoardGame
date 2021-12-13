@@ -13,7 +13,8 @@ import { ResizeService } from '../service/resize.service';
 import { RequestService } from './service/request.service';
 import { GameLogicService } from './service/game-logic.service';
 import { GameStepComponent } from './component/room/game-step/game-step.component';
-import { MatchingDialogComponent } from './component/room/matching-dialog/matching-dialog.component';
+import { MatchingComponent } from './component/room/matching/matching.component';
+import { GameOverComponent } from './component/room/game-over/game-over.component';
 
 
 
@@ -25,7 +26,8 @@ import { MatchingDialogComponent } from './component/room/matching-dialog/matchi
     GameBoardComponent,
     RoomTableComponent,
     GameStepComponent,
-    MatchingDialogComponent
+    MatchingComponent,
+    GameOverComponent,
   ],
   imports: [
     CommonModule,

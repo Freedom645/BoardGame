@@ -1,0 +1,33 @@
+<section>
+  <mat-list role="list">
+    <mat-list-item role="listitem">
+      <label>部屋ID</label>
+      <div class="value">{{roomId | slice : 0 : 8}}
+        <button class="copy-button" mat-icon-button matTooltipPosition="right" matTooltip="部屋IDをコピーする"
+                [cdkCopyToClipboard]="roomId">
+          <mat-icon class="mat-18">content_copy</mat-icon>
+        </button>
+      </div>
+    </mat-list-item>
+    <mat-list-item role="listitem">
+      <label>あなた</label>
+      <div class="value">{{playerName}}</div>
+    </mat-list-item>
+    <mat-list-item role="listitem">
+      <label>対局相手</label>
+
+      <div class="value">
+        <div *ngIf="opponentPlayer; then thenBlock else elseBlock"></div>
+        <ng-template #thenBlock>{{opponentPlayer}}</ng-template>
+        <ng-template #elseBlock>
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </ng-template>
+      </div>
+    </mat-list-item>
+  </mat-list>
+
+  <div class="action">
+    <button mat-button (click)="approve(true)" [disabled]="opponentPlayer">承認する</button>
+    <button mat-button (click)="approve(false)" [disabled]="opponentPlayer">拒否する</button>
+  </div>
+</section>

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketService } from 'src/app/service/web-socket.service';
@@ -11,8 +11,7 @@ import { Overlay } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { MatSpinner } from '@angular/material/progress-spinner';
 import { GameLogicService } from '../../service/game-logic.service';
-import { MatchingDialogComponent, MatchingDialogData } from './matching-dialog/matching-dialog.component';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatStepper } from '@angular/material/stepper';
 
 @Component({
   selector: 'app-room',
@@ -22,9 +21,12 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 export class RoomComponent implements OnInit, OnDestroy {
   roomId: string;
   playerName: string;
+  opponentPlayer: string;
+
   board: Board;
   step: GameStep;
 
+  @ViewChild('stepper') private stepper!: MatStepper;
   private readonly subscription: Subscription[] = [];
 
   private overlayRef;
@@ -37,9 +39,10 @@ export class RoomComponent implements OnInit, OnDestroy {
     private requestService: RequestService,
     private overlay: Overlay,
     private logic: GameLogicService,
-    public dialog: MatDialog,
   ) {
     this.playerName = "";
+    this.opponentPlayer = "";
+
     this.step = Step.Matching;
     this.roomId = acRoute.snapshot.params["id"];
 
@@ -89,7 +92,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.overlayRef.detach();
     switch (msg.response?.step) {
       case Step.Matching:
-        this.matching(this.roomId);
         return;
       case Step.Pending:
         return;
@@ -106,32 +108,11 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  private matchingDialog: MatDialogRef<MatchingDialogComponent, boolean> | null = null;
-  private matching(id: string) {
-    if (this.matchingDialog) {
-      return;
-    }
-    this.matchingDialog = this.dialog.open(MatchingDialogComponent, {
-      width: '100%',
-      minHeight: 'calc(100vh - 90px)',
-      height: 'auto',
-      data: { roomId: id } as MatchingDialogData,
-    });
-
-    this.matchingDialog.afterClosed().subscribe(result => {
-      if (result) {
-        return;
-      }
-      this.router.navigate(["othello", "room"]);
-      return;
-    });
-  }
-
   test() {
     const arr = [Step.Matching, Step.Pending, Step.Waiting, Step.Black, Step.White, Step.GameOver, Step.Continue];
     const index = arr.findIndex(st => st == this.step);
     this.step = arr[(index + 1) % arr.length];
 
-    this.matching(this.roomId);
+    this.stepper.next();
   }
 }
