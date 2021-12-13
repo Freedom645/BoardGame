@@ -13,7 +13,6 @@ import (
 	"github.com/Freedom645/BoardGame/domain/enum/stone_type"
 	"github.com/Freedom645/BoardGame/domain/game"
 	"github.com/Freedom645/BoardGame/domain/room"
-	"github.com/Freedom645/BoardGame/service/room_service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
@@ -37,7 +36,7 @@ var melodyManager = &melodyManagerStruct{sockets: make(map[uuid.UUID]*socketStru
 
 /* 部屋作成 */
 func HandleCreateRoom(ctx *gin.Context) {
-	room, err := room_service.CreateRoom()
+	room, err := room.NewRoom()
 	if err != nil {
 		// 500
 		log.Error(err)

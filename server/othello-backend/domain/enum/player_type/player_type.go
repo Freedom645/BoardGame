@@ -1,9 +1,8 @@
-package playerType
+package player_type
 
 type PlayerType string
 
 const (
 	Spectator = PlayerType("Spectator")
-	First     = PlayerType("First")
-	Second    = PlayerType("Second")
+	Player    = PlayerType("Player")
 )
