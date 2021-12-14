@@ -13,13 +13,14 @@ import (
 )
 
 type UserInfo struct {
-	Uid string
+	Uid  string
+	Name string
 }
 
 /* 認証情報取得用のミドルウェア */
 func BearerMiddleware(fireApp *firebase.App) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token, err := verifyIDToken(ctx, fireApp)
+		user, err := verifyIDToken(ctx, fireApp)
 
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -27,7 +28,12 @@ func BearerMiddleware(fireApp *firebase.App) gin.HandlerFunc {
 		}
 
 		userInfo := UserInfo{
-			Uid: token.UID,
+			Uid:  user.UID,
+			Name: user.DisplayName,
+		}
+
+		if user.DisplayName == "" {
+			userInfo.Name = "Guest_" + user.UID[0:8]
 		}
 
 		ctx.Set("userInfo", userInfo)
@@ -36,7 +42,7 @@ func BearerMiddleware(fireApp *firebase.App) gin.HandlerFunc {
 	}
 }
 
-func verifyIDToken(ctx *gin.Context, app *firebase.App) (*auth.Token, error) {
+func verifyIDToken(ctx *gin.Context, app *firebase.App) (*auth.UserRecord, error) {
 	client, err := app.Auth(ctx)
 	if err != nil {
 		log.Error("error getting Auth client: %v\n", err)
@@ -55,7 +61,7 @@ func verifyIDToken(ctx *gin.Context, app *firebase.App) (*auth.Token, error) {
 		return nil, err
 	}
 
-	return token, nil
+	return client.GetUser(ctx, token.UID)
 }
 
 func exactToken(ctx *gin.Context) (string, error) {

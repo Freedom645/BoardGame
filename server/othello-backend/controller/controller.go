@@ -126,7 +126,7 @@ func HandleConnect(ctx *gin.Context) {
 	userInfo, _ := middleware.GetUserFromContext(ctx)
 
 	// アップグレード
-	var keys = map[string]interface{}{"uid": userInfo.Uid, "pt": pt}
+	var keys = map[string]interface{}{"userInfo": userInfo, "pt": pt}
 	err = socket.melody.HandleRequestWithKeys(ctx.Writer, ctx.Request, keys)
 	if err != nil {
 		// 500 ハンドシェイク失敗
@@ -163,12 +163,12 @@ func makeMelodyHandler(m *melody.Melody, r *room.Room) MelodyHandler {
 	res := MelodyHandler{
 		/* セッションコネクション時 */
 		connectHandler: func(s *melody.Session) {
-			uid := s.Keys["uid"].(string)
+			userInfo := s.Keys["userInfo"].(middleware.UserInfo)
 			pt := s.Keys["pt"].(player_type.PlayerType)
 
-			log.Printf("websocket connection open. [%s]\n", uid)
+			log.Printf("websocket connection open. [%s]\n", userInfo.Uid)
 
-			isJoin := r.AddPlayer(uid, pt)
+			isJoin := r.AddPlayer(userInfo.Uid, userInfo.Name, pt)
 
 			response, err := procResponse(r)
 			if err != nil {
@@ -199,8 +199,8 @@ func makeMelodyHandler(m *melody.Melody, r *room.Room) MelodyHandler {
 				return
 			}
 
-			uid := s.Keys["uid"].(string)
-			if err := procRequest(r, uid, reqMes.Request); err != nil {
+			userInfo := s.Keys["userInfo"].(middleware.UserInfo)
+			if err := procRequest(r, userInfo, reqMes.Request); err != nil {
 				log.Info(err.Error())
 				s.Write([]byte(`"invalid request"`))
 				return
@@ -226,14 +226,14 @@ func makeMelodyHandler(m *melody.Melody, r *room.Room) MelodyHandler {
 
 		/* セッション離脱時 */
 		disconnectHandler: func(s *melody.Session) {
-			uid := s.Keys["uid"].(string)
-			log.Printf("websocket connection close. [%s]\n", uid)
+			userInfo := s.Keys["userInfo"].(middleware.UserInfo)
+			log.Printf("websocket connection close. [%s]\n", userInfo.Uid)
 
-			if remain := r.RemovePlayer(uid); remain == 0 {
+			if remain := r.RemovePlayer(userInfo.Uid); remain == 0 {
 				// 参加者が0の場合は、部屋削除
 				melodyManager.locker.Lock()
 				defer melodyManager.locker.Unlock()
-				delete(melodyManager.sockets, r.UUID())
+				// delete(melodyManager.sockets, r.UUID())
 
 				// TODO 観戦者に通知したい
 				// m.Broadcast([]byte("部屋解散"))
@@ -244,14 +244,12 @@ func makeMelodyHandler(m *melody.Melody, r *room.Room) MelodyHandler {
 	return res
 }
 
-func procRequest(r *room.Room, uid string, req model.RequestMessage) error {
-	name := req.PlayerName
-
+func procRequest(r *room.Room, userInfo middleware.UserInfo, req model.RequestMessage) error {
 	switch r.Step() {
 	case room.Pending:
 		// 対局承認
 		isApproved := req.Pending.IsApproved
-		if err := r.Approve(uid, name, isApproved); err != nil {
+		if err := r.Approve(userInfo.Uid, isApproved); err != nil {
 			return err
 		}
 	case room.Black:
@@ -259,14 +257,14 @@ func procRequest(r *room.Room, uid string, req model.RequestMessage) error {
 	case room.White:
 		// 対局中
 		pm := req.Game.Point
-		if err := r.Put(uid, game.NewPoint(pm.X, pm.Y)); err != nil {
+		if err := r.Put(userInfo.Uid, game.NewPoint(pm.X, pm.Y)); err != nil {
 			return err
 		}
 
 	case room.GameOver:
 		// ゲーム終了時
 		isContinue := req.GameOver.IsContinued
-		if err := r.Approve(uid, name, isContinue); err != nil {
+		if err := r.Approve(userInfo.Uid, isContinue); err != nil {
 			return err
 		}
 	}

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Player } from 'src/app/othello/model/room';
 
 @Component({
   selector: 'app-matching',
@@ -8,8 +9,8 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 export class MatchingComponent implements OnInit {
 
   @Input() roomId: string = "";
-  @Input() playerName: string = "";
-  @Input() opponentPlayer: string = "";
+  @Input() owner!: Player;
+  @Input() opponent!: Player;
 
   @Output() clickApprove = new EventEmitter<boolean>();
 
@@ -21,7 +22,7 @@ export class MatchingComponent implements OnInit {
   }
 
   approve(isApprove: boolean) {
-    if (this.opponentPlayer) {
+    if (this.opponent) {
       this.clickApprove.emit(isApprove);
     }
   }

@@ -10,15 +10,15 @@
       </div>
     </mat-list-item>
     <mat-list-item role="listitem">
-      <label>あなた</label>
-      <div class="value">{{playerName}}</div>
+      <label>部屋主</label>
+      <div class="value">{{owner?.name}}</div>
     </mat-list-item>
     <mat-list-item role="listitem">
-      <label>対局相手</label>
+      <label>対局者</label>
 
       <div class="value">
-        <div *ngIf="opponentPlayer; then thenBlock else elseBlock"></div>
-        <ng-template #thenBlock>{{opponentPlayer}}</ng-template>
+        <div *ngIf="opponent; then thenBlock else elseBlock"></div>
+        <ng-template #thenBlock>{{opponent?.name}}</ng-template>
         <ng-template #elseBlock>
           <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </ng-template>
@@ -27,7 +27,7 @@
   </mat-list>
 
   <div class="action">
-    <button mat-button (click)="approve(true)" [disabled]="opponentPlayer">承認する</button>
-    <button mat-button (click)="approve(false)" [disabled]="opponentPlayer">拒否する</button>
+    <button mat-button (click)="approve(true)" [disabled]="!opponent">承認する</button>
+    <button mat-button (click)="approve(false)" [disabled]="!opponent">拒否する</button>
   </div>
 </section>

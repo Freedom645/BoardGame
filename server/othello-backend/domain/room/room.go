@@ -91,7 +91,7 @@ func (r *Room) Created() time.Time {
 }
 
 /* 承認処理 */
-func (r *Room) Approve(uid string, name string, isApprove bool) error {
+func (r *Room) Approve(uid string, isApprove bool) error {
 	r.locker.Lock()
 	defer r.locker.Unlock()
 
@@ -100,12 +100,11 @@ func (r *Room) Approve(uid string, name string, isApprove bool) error {
 	}
 
 	var isApproveAll = true
-	for _, v := range r.players {
-		if uid == v.Id {
-			v.IsApprove = isApprove
-			v.Name = name
+	for i := range r.players {
+		if uid == r.players[i].Id {
+			r.players[i].IsApprove = isApprove
 		}
-		isApproveAll = isApproveAll && v.IsApprove
+		isApproveAll = isApproveAll && r.players[i].IsApprove
 	}
 
 	if isApproveAll {
@@ -155,17 +154,23 @@ func (r *Room) Put(uid string, p game.Point) error {
 	r.game.Board.PutOne(p, stone)
 	r.game.Board.Put(&points, stone)
 
+	if r.step == Black {
+		r.step = White
+	} else {
+		r.step = Black
+	}
+
 	return nil
 }
 
 /* 部屋参加 */
-func (r *Room) AddPlayer(uid string, playerType player_type.PlayerType) bool {
+func (r *Room) AddPlayer(uid string, name string, playerType player_type.PlayerType) bool {
 	r.locker.Lock()
 	defer r.locker.Unlock()
 
 	player := player.Player{
 		Id:        uid,
-		Name:      "",
+		Name:      name,
 		IsApprove: false,
 	}
 

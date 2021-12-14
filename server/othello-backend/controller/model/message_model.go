@@ -12,10 +12,9 @@ type Message struct {
 }
 
 type RequestMessage struct {
-	PlayerName string          `json:"playerName"`
-	Pending    PendingRequest  `json:"pending"`
-	Game       GameRequest     `json:"game"`
-	GameOver   GameOverRequest `json:"gameOver"`
+	Pending  PendingRequest  `json:"pending"`
+	Game     GameRequest     `json:"game"`
+	GameOver GameOverRequest `json:"gameOver"`
 }
 
 type ResponseMessage struct {

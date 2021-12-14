@@ -7,15 +7,33 @@ export class RequestService {
 
   constructor() { }
 
-  public requestGame(playerName: string, point: Point): GameMessage {
-    const value: GameMessage = {
+  public requestGame(point: Point): GameMessage {
+    return {
       request: {
-        playerName: playerName,
         game: {
           point: point
         }
       }
     };
-    return value;
+  }
+
+  public requestPending(isApprove: boolean): GameMessage {
+    return {
+      request: {
+        pending: {
+          isApproved: isApprove
+        }
+      }
+    };
+  }
+
+  public requestGameOver(isContinue: boolean): GameMessage {
+    return {
+      request: {
+        gameOver: {
+          isContinued: isContinue
+        }
+      }
+    };
   }
 }

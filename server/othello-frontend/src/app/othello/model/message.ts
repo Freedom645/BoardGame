@@ -6,8 +6,6 @@ export type PlayerType = "player" | "spectator";
 
 /** 承認待ち */
 export type Pending = "pending";
-/** ゲーム順番待ち */
-export type Waiting = "waiting";
 /** ゲーム終了 */
 export type GameOver = "gameOver";
 
@@ -25,7 +23,7 @@ export const Step = {
 };
 
 /** ゲーム遷移状態 */
-export type GameStep = Pending | Waiting | StoneType | GameOver;
+export type GameStep = Pending | StoneType | GameOver;
 
 export const serializer: Serializer<GameMessage> = (e) => JSON.stringify(e);
 
@@ -39,7 +37,6 @@ export interface GameMessage {
 
 /** ゲームリクエストメッセージ */
 export interface GameRequestMessage {
-  playerName: string;
   pending?: PendingRequest;
   game?: GameRequest;
   gameOver?: GameOverRequest;

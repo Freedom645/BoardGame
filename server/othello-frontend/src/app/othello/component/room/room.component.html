@@ -1,9 +1,10 @@
-<mat-stepper [selectedIndex]="2" [disableRipple]="true" #stepper>
+<mat-stepper [selectedIndex]="stepIndex" [disableRipple]="true" #stepper>
   <mat-step state="matching" #matchingStep [completed]="false">
     <ng-template matStepLabel>待機</ng-template>
     <div class="wrapper">
       <div class="box">
-        <app-matching [roomId]="roomId" [playerName]="playerName" [opponentPlayer]="opponentPlayer"></app-matching>
+        <app-matching [roomId]="roomId" [owner]="owner" [opponent]="opponent" (clickApprove)="clickApprove($event)">
+        </app-matching>
       </div>
     </div>
   </mat-step>

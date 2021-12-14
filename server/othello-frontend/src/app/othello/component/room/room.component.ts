@@ -12,6 +12,7 @@ import { ComponentPortal } from '@angular/cdk/portal';
 import { MatSpinner } from '@angular/material/progress-spinner';
 import { GameLogicService } from '../../service/game-logic.service';
 import { MatStepper } from '@angular/material/stepper';
+import { Player, Turn } from '../../model/room';
 
 @Component({
   selector: 'app-room',
@@ -22,10 +23,16 @@ export class RoomComponent implements OnInit, OnDestroy {
   readonly roomId: string;
   readonly playerType: PlayerType;
   playerName: string;
-  opponentPlayer: string;
+
+  owner!: Player;
+  opponent!: Player;
+  private turn!: Turn;
 
   board: Board;
   step: GameStep;
+  stepIndex: number;
+  blackName: string;
+  whiteName: string;
 
   @ViewChild('stepper') private stepper!: MatStepper;
   private readonly subscription: Subscription[] = [];
@@ -42,11 +49,14 @@ export class RoomComponent implements OnInit, OnDestroy {
     private logic: GameLogicService,
   ) {
     this.playerName = "";
-    this.opponentPlayer = "";
 
     this.step = Step.Pending;
+    this.stepIndex = 0;
     this.roomId = acRoute.snapshot.params["id"];
     this.playerType = acRoute.snapshot.queryParams["pt"] != "spectator" ? "player" : "spectator";
+
+    this.blackName = "";
+    this.whiteName = "";
 
     this.board = this.logic.newBoard();
 
@@ -75,8 +85,13 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.overlayRef.detach();
   }
 
+  clickApprove(isApprove: boolean) {
+    const value = this.requestService.requestPending(isApprove);
+    this.sendMessage(value);
+  }
+
   clickBoard(p: Point) {
-    const value = this.requestService.requestGame(this.playerName, p);
+    const value = this.requestService.requestGame(p);
     this.sendMessage(value);
   }
 
@@ -89,27 +104,25 @@ export class RoomComponent implements OnInit, OnDestroy {
     if (!msg.response) {
       return;
     }
+    const players = msg.response.players;
     this.step = msg.response.step;
     this.board = msg.response.board;
+    this.owner = msg.response.owner;
+    this.opponent = players[1];
+    this.turn = msg.response.turn;
+
+    if (this.step == "pending") {
+      this.stepIndex = 0;
+    } else if (this.step == "black" || this.step == "white") {
+      this.stepIndex = 1;
+    } else if (this.step == "gameOver") {
+      this.stepIndex = 2;
+    }
+
+    this.blackName = players.find(p => p.id == this.turn.blackId)?.name ?? "";
+    this.whiteName = players.find(p => p.id == this.turn.whiteId)?.name ?? "";
 
     this.overlayRef.detach();
-    switch (msg.response?.step) {
-      case Step.Pending:
-        return;
-      case Step.Black:
-        return;
-      case Step.White:
-        return;
-      case Step.GameOver:
-        return;
-    }
   }
 
-  test() {
-    const arr = [Step.Pending, Step.Black, Step.White, Step.GameOver];
-    const index = arr.findIndex(st => st == this.step);
-    this.step = arr[(index + 1) % arr.length];
-
-    this.stepper.next();
-  }
 }
