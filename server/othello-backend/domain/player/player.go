@@ -1,6 +1,7 @@
 package player
 
 type Player struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id        string
+	Name      string
+	IsApprove bool
 }

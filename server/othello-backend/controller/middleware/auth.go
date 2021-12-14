@@ -92,3 +92,13 @@ func parseWebSocketProtocol(ctx *gin.Context) (string, error) {
 
 	return header[0], nil
 }
+
+/* Contextからユーザ情報取得 */
+func GetUserFromContext(ctx *gin.Context) (UserInfo, error) {
+	obj, exists := ctx.Get("userInfo")
+	if exists {
+		return obj.(UserInfo), nil
+	}
+
+	return UserInfo{}, errors.New("userinfo does not exists")
+}

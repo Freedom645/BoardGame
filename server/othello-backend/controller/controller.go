@@ -2,15 +2,12 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"sync"
 
 	"github.com/Freedom645/BoardGame/controller/middleware"
 	"github.com/Freedom645/BoardGame/controller/model"
-	gameStateModel "github.com/Freedom645/BoardGame/controller/model/game_state_model"
-	"github.com/Freedom645/BoardGame/controller/model/room_model"
-	"github.com/Freedom645/BoardGame/domain/enum/stone_type"
+	"github.com/Freedom645/BoardGame/controller/model/state_model"
 	"github.com/Freedom645/BoardGame/domain/game"
 	"github.com/Freedom645/BoardGame/domain/room"
 	"github.com/gin-gonic/gin"
@@ -53,7 +50,7 @@ func HandleCreateRoom(ctx *gin.Context) {
 		room:   room,
 	}
 
-	res := room_model.Room{Id: room.UUID().String(), Created: room.Created()}
+	res := model.Room{Id: room.UUID().String(), Created: room.Created()}
 	ctx.JSON(http.StatusCreated, res)
 }
 
@@ -72,29 +69,27 @@ func HandleGetRoom(ctx *gin.Context) {
 	socket := melodyManager.sockets[roomId]
 
 	room := socket.room
-	res := room_model.Room{Id: room.UUID().String(), Created: room.Created()}
+	res := model.Room{Id: room.UUID().String(), Created: room.Created()}
 	ctx.JSON(http.StatusOK, res)
-
 }
 
 /* 部屋一覧取得 */
 func HandleGetRoomList(ctx *gin.Context) {
-
-	obj, _ := ctx.Get("userInfo")
-	userInfo := obj.(middleware.UserInfo)
-
+	userInfo, err := middleware.GetUserFromContext(ctx)
+	if err != nil {
+		ctx.Status(http.StatusUnauthorized)
+		return
+	}
 	log.Printf("userID = %v", userInfo.Uid)
 
 	// 排他処理（書き込み）
 	melodyManager.locker.RLock()
 	defer melodyManager.locker.RUnlock()
 
-	var res = []room_model.Room{}
+	var res = []model.Room{}
 	for _, v := range melodyManager.sockets {
-		room := v.room
-		model := room_model.Room{Id: room.UUID().String(), Created: room.Created()}
-
-		res = append(res, model)
+		model := model.Of(v.room)
+		res = append(res, *model)
 	}
 
 	ctx.JSON(http.StatusOK, res)
@@ -120,8 +115,12 @@ func HandleConnect(ctx *gin.Context) {
 		return
 	}
 
+	// UID取得
+	userInfo, _ := middleware.GetUserFromContext(ctx)
+
 	// アップグレード
-	err = socket.melody.HandleRequest(ctx.Writer, ctx.Request)
+	var keys = map[string]interface{}{"uid": userInfo.Uid}
+	err = socket.melody.HandleRequestWithKeys(ctx.Writer, ctx.Request, keys)
 	if err != nil {
 		// 500 ハンドシェイク失敗
 		log.Fatal(err)
@@ -153,19 +152,23 @@ type MelodyHandler struct {
 }
 
 /* メロディハンドラ作成 */
-func makeMelodyHandler(m *melody.Melody, room *room.Room) MelodyHandler {
+func makeMelodyHandler(m *melody.Melody, r *room.Room) MelodyHandler {
 	res := MelodyHandler{
+		/* セッションコネクション時 */
 		connectHandler: func(s *melody.Session) {
-			log.Printf("websocket connection open.\n")
+			uid := s.Keys["uid"].(string)
+			log.Printf("websocket connection open. [%s]\n", uid)
 
-			res := model.GameMessage{
-				Response: model.GameResponseMessage{
-					Step:  gameStateModel.BlackTurn,
-					Board: room.Game.Board.Stones(),
-				},
+			response, err := procResponse(r)
+			if err != nil {
+				log.Info(err.Error())
+				s.Write([]byte(`"invalid request"`))
+				return
 			}
 
-			d, err := json.Marshal(res)
+			d, err := json.Marshal(model.Message{
+				Response: response,
+			})
 			if err != nil {
 				log.Error(err)
 				return
@@ -173,29 +176,31 @@ func makeMelodyHandler(m *melody.Melody, room *room.Room) MelodyHandler {
 
 			s.Write([]byte(d))
 		},
+		/* メッセージやり取り時 */
 		melodyHandler: func(s *melody.Session, msg []byte) {
-			var req model.GameMessage
-			if err := json.Unmarshal(msg, &req); err != nil {
+			var reqMes model.Message
+			if err := json.Unmarshal(msg, &reqMes); err != nil {
 				s.Write([]byte(`"invalid format"`))
 				return
 			}
 
-			pm := req.Request.Game.Point
-
-			err := room.Put(game.NewPoint(pm.X, pm.Y), stone_type.Black)
-			if err != nil {
-				s.Write([]byte(fmt.Sprintf(`"%s"`, err.Error())))
+			uid := s.Keys["uid"].(string)
+			if err := procRequest(r, uid, reqMes.Request); err != nil {
+				log.Info(err.Error())
+				s.Write([]byte(`"invalid request"`))
 				return
 			}
 
-			res := model.GameMessage{
-				Response: model.GameResponseMessage{
-					Step:  gameStateModel.BlackTurn,
-					Board: room.Game.Board.Stones(),
-				},
+			response, err := procResponse(r)
+			if err != nil {
+				log.Info(err.Error())
+				s.Write([]byte(`"invalid request"`))
+				return
 			}
 
-			d, err := json.Marshal(res)
+			d, err := json.Marshal(model.Message{
+				Response: response,
+			})
 			if err != nil {
 				log.Error(err)
 				return
@@ -203,10 +208,65 @@ func makeMelodyHandler(m *melody.Melody, room *room.Room) MelodyHandler {
 
 			m.Broadcast([]byte(d))
 		},
+
+		/* セッション離脱時 */
 		disconnectHandler: func(s *melody.Session) {
-			log.Printf("websocket connection close.\n")
+			uid := s.Keys["uid"].(string)
+			log.Printf("websocket connection close. [%s]\n", uid)
+
+			if remain := r.RemovePlayer(uid); remain == 0 {
+				// 参加者が0の場合は、部屋削除
+				melodyManager.locker.Lock()
+				defer melodyManager.locker.Unlock()
+				delete(melodyManager.sockets, r.UUID())
+
+				// TODO 観戦者に通知したい
+				// m.Broadcast([]byte("部屋解散"))
+			}
 		},
 	}
 
 	return res
+}
+
+func procRequest(r *room.Room, uid string, req model.RequestMessage) error {
+	name := req.PlayerName
+
+	switch r.Step() {
+	case room.Pending:
+		// 対局承認
+		isApproved := req.Pending.IsApproved
+		if err := r.Approve(uid, name, isApproved); err != nil {
+			return err
+		}
+	case room.Black:
+		fallthrough
+	case room.White:
+		// 対局中
+		pm := req.Game.Point
+		if err := r.Put(uid, game.NewPoint(pm.X, pm.Y)); err != nil {
+			return err
+		}
+
+	case room.GameOver:
+		// ゲーム終了時
+		isContinue := req.GameOver.IsContinued
+		if err := r.Approve(uid, name, isContinue); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func procResponse(r *room.Room) (model.ResponseMessage, error) {
+	res := model.ResponseMessage{
+		Step:    state_model.Of(r.Step()),
+		Board:   r.Stones(),
+		Owner:   model.ParsePlayer(r.Owner()),
+		Players: model.ParsePlayers(r.Players()),
+		Turn:    model.TurnOf(r.Turn()),
+	}
+
+	return res, nil
 }
