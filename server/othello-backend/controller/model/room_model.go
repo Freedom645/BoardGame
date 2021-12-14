@@ -20,6 +20,12 @@ type Room struct {
 	Created time.Time `json:"created"`
 }
 
+/* 手番 */
+type Turn struct {
+	BlackId string `json:"blackId"`
+	WhiteId string `json:"whiteId"`
+}
+
 func Of(r *room.Room) *Room {
 	return &Room{
 		Id:      r.UUID().String(),

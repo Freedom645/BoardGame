@@ -1,5 +1,8 @@
 import { Deserializer, Serializer } from "src/app/service/web-socket.service";
 import { Board, Point, Stone, StoneType } from "./game";
+import { Player, Turn } from "./room";
+
+export type PlayerType = "player" | "spectator";
 
 /** 承認待ち */
 export type Pending = "pending";
@@ -60,5 +63,11 @@ export interface GameResponseMessage {
   step: GameStep;
   /** 盤面状態 */
   board: Board;
+  /** 部屋主 */
+  owner: Player;
+  /** 参加プレイヤー */
+  players: Player[];
+  /** 手番 */
+  turn: Turn;
 };
 

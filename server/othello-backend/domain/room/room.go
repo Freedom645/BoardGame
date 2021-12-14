@@ -103,6 +103,7 @@ func (r *Room) Approve(uid string, name string, isApprove bool) error {
 	for _, v := range r.players {
 		if uid == v.Id {
 			v.IsApprove = isApprove
+			v.Name = name
 		}
 		isApproveAll = isApproveAll && v.IsApprove
 	}
@@ -158,24 +159,31 @@ func (r *Room) Put(uid string, p game.Point) error {
 }
 
 /* 部屋参加 */
-func (r *Room) AddPlayer(player player.Player, playerType player_type.PlayerType) (bool, error) {
+func (r *Room) AddPlayer(uid string, playerType player_type.PlayerType) bool {
 	r.locker.Lock()
 	defer r.locker.Unlock()
+
+	player := player.Player{
+		Id:        uid,
+		Name:      "",
+		IsApprove: false,
+	}
 
 	switch playerType {
 	case player_type.Player:
 		if len(r.players) >= 2 {
 			// プレイヤーが2人以上いる場合は失敗
-			return false, nil
+			return false
 		}
 		r.players = append(r.players, player)
-		return true, nil
+		return true
+
 	case player_type.Spectator:
 		// 観戦者は何もしない
-		return true, nil
+		return true
 	}
 
-	return false, errors.New("unknown type")
+	return false
 }
 
 /* 部屋を抜ける */

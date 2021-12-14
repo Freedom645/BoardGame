@@ -16,20 +16,20 @@ export class WebSocketService {
     private acc: AccountService,
   ) { }
 
-  public connect<T>(roomId: string, serializer: Serializer<T>, deserializer: Deserializer<T>): Observable<WebSocketSubject<T>> {
+  public connect<T>(path: string, serializer: Serializer<T>, deserializer: Deserializer<T>, ...protocol: string[]): Observable<WebSocketSubject<T>> {
     return this.acc.getJwt()
       .pipe(
-        map(jwt => this.makeConfig<T>(`${this.URL}/room/${roomId}/ws`, jwt, serializer, deserializer)),
+        map(jwt => this.makeConfig<T>(`${this.URL}${path}`, serializer, deserializer, [jwt, ...protocol])),
         map(config => webSocket<T>(config))
       );
   }
 
-  private makeConfig<T>(url: string, jwt: string, serializer: Serializer<T>, deserializer: Deserializer<T>): WebSocketSubjectConfig<T> {
+  private makeConfig<T>(url: string, serializer: Serializer<T>, deserializer: Deserializer<T>, protocol: string[]): WebSocketSubjectConfig<T> {
     const config: WebSocketSubjectConfig<T> = {
       url: url,
       serializer: serializer,
       deserializer: deserializer,
-      protocol: jwt
+      protocol: protocol,
     };
     return config;
   }

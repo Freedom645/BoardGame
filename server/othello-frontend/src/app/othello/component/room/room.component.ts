@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebSocketService } from 'src/app/service/web-socket.service';
-import { deserializer, GameMessage, GameStep, serializer, Step } from '../../model/message';
+import { deserializer, GameMessage, GameStep, PlayerType, serializer, Step } from '../../model/message';
 import { Board, Mass, Point, Stone, StoneType } from '../../model/game';
 import { AccountService } from 'src/app/service/account.service';
 import { Subscription } from 'rxjs';
@@ -19,7 +19,8 @@ import { MatStepper } from '@angular/material/stepper';
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent implements OnInit, OnDestroy {
-  roomId: string;
+  readonly roomId: string;
+  readonly playerType: PlayerType;
   playerName: string;
   opponentPlayer: string;
 
@@ -45,6 +46,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
     this.step = Step.Pending;
     this.roomId = acRoute.snapshot.params["id"];
+    this.playerType = acRoute.snapshot.queryParams["pt"] != "spectator" ? "player" : "spectator";
 
     this.board = this.logic.newBoard();
 
@@ -59,7 +61,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.subscription.push(this.accService.getUsername().subscribe(name => this.playerName = name));
     // wsコネクト
     this.overlayRef.attach(new ComponentPortal(MatSpinner));
-    this.webSocketService.connect<GameMessage>(this.roomId, serializer, deserializer)
+    this.webSocketService.connect<GameMessage>(`/room/${this.roomId}/ws?pt=${this.playerType}`, serializer, deserializer)
       .subscribe(
         ws => {
           this.subscription.push(ws.subscribe(msg => this.receiveMessage(msg)));

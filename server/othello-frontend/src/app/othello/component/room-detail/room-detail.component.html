@@ -1,10 +1,13 @@
 <h1 mat-dialog-title></h1>
 <div mat-dialog-content>
   <p>
-    部屋ID: {{room.id}}
+    部屋ID: {{roomId}}
   </p>
   <p>
-    作成日: {{room.created | date: 'yyyy/MM/dd HH:mm:ss'}}
+    作成日: {{created | date: 'yyyy/MM/dd HH:mm:ss'}}
+  </p>
+  <p>
+    部屋主: {{ownerName}}
   </p>
 </div>
 <div mat-dialog-actions>

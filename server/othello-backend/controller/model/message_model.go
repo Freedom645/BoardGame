@@ -47,12 +47,6 @@ type Point struct {
 	Y int `json:"y"`
 }
 
-/* 手番 */
-type Turn struct {
-	BlackId string `json:"blackId"`
-	WhiteId string `json:"whiteId"`
-}
-
 func TurnOf(t game.Turn) Turn {
 	return Turn{
 		BlackId: t.BlackId,

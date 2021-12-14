@@ -8,6 +8,7 @@ import (
 	"github.com/Freedom645/BoardGame/controller/middleware"
 	"github.com/Freedom645/BoardGame/controller/model"
 	"github.com/Freedom645/BoardGame/controller/model/state_model"
+	"github.com/Freedom645/BoardGame/domain/enum/player_type"
 	"github.com/Freedom645/BoardGame/domain/game"
 	"github.com/Freedom645/BoardGame/domain/room"
 	"github.com/gin-gonic/gin"
@@ -68,8 +69,7 @@ func HandleGetRoom(ctx *gin.Context) {
 
 	socket := melodyManager.sockets[roomId]
 
-	room := socket.room
-	res := model.Room{Id: room.UUID().String(), Created: room.Created()}
+	res := model.Of(socket.room)
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -100,7 +100,14 @@ func HandleConnect(ctx *gin.Context) {
 	roomId, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		// 400 ID形式間違い
-		ctx.String(http.StatusBadRequest, "the format of Room ID [%s] is incorrect.", ctx.PostForm("roomId"))
+		ctx.String(http.StatusBadRequest, "the format of Room ID [%s] is incorrect.", ctx.Param("id"))
+		return
+	}
+
+	pt, err := player_type.Of(ctx.Query("pt"))
+	if err != nil {
+		// 400 プレイヤータイプ不明
+		ctx.String(http.StatusBadRequest, "%s [%s]", err.Error(), ctx.Query("pt"))
 		return
 	}
 
@@ -119,7 +126,7 @@ func HandleConnect(ctx *gin.Context) {
 	userInfo, _ := middleware.GetUserFromContext(ctx)
 
 	// アップグレード
-	var keys = map[string]interface{}{"uid": userInfo.Uid}
+	var keys = map[string]interface{}{"uid": userInfo.Uid, "pt": pt}
 	err = socket.melody.HandleRequestWithKeys(ctx.Writer, ctx.Request, keys)
 	if err != nil {
 		// 500 ハンドシェイク失敗
@@ -157,7 +164,11 @@ func makeMelodyHandler(m *melody.Melody, r *room.Room) MelodyHandler {
 		/* セッションコネクション時 */
 		connectHandler: func(s *melody.Session) {
 			uid := s.Keys["uid"].(string)
+			pt := s.Keys["pt"].(player_type.PlayerType)
+
 			log.Printf("websocket connection open. [%s]\n", uid)
+
+			isJoin := r.AddPlayer(uid, pt)
 
 			response, err := procResponse(r)
 			if err != nil {
@@ -174,7 +185,11 @@ func makeMelodyHandler(m *melody.Melody, r *room.Room) MelodyHandler {
 				return
 			}
 
-			s.Write([]byte(d))
+			if pt == player_type.Player && isJoin {
+				m.Broadcast([]byte(d))
+			} else {
+				s.Write([]byte(d))
+			}
 		},
 		/* メッセージやり取り時 */
 		melodyHandler: func(s *melody.Session, msg []byte) {
