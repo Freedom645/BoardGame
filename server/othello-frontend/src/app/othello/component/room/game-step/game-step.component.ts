@@ -12,7 +12,7 @@ export class GameStepComponent implements OnInit, OnChanges {
   displayStep: string;
 
   constructor() {
-    this.step = Step.Matching;
+    this.step = Step.Pending;
     this.displayStep = "";
   }
 
@@ -27,13 +27,10 @@ export class GameStepComponent implements OnInit, OnChanges {
 
   private convertDisplayStep(step: GameStep): string {
     switch (step) {
-      case Step.Matching: return "Matching";
       case Step.Pending: return "Pending";
       case Step.Black: return "Black Turn";
       case Step.White: return "White Turn";
-      case Step.Waiting: return "Waiting";
       case Step.GameOver: return "Game Over";
-      case Step.Continue: return "Continue";
     }
     return "";
   }

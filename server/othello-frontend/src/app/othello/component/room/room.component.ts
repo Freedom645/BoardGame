@@ -43,7 +43,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.playerName = "";
     this.opponentPlayer = "";
 
-    this.step = Step.Matching;
+    this.step = Step.Pending;
     this.roomId = acRoute.snapshot.params["id"];
 
     this.board = this.logic.newBoard();
@@ -70,6 +70,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.forEach(sub => sub.unsubscribe());
+    this.overlayRef.detach();
   }
 
   clickBoard(p: Point) {
@@ -91,11 +92,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
     this.overlayRef.detach();
     switch (msg.response?.step) {
-      case Step.Matching:
-        return;
       case Step.Pending:
-        return;
-      case Step.Waiting:
         return;
       case Step.Black:
         return;
@@ -103,13 +100,11 @@ export class RoomComponent implements OnInit, OnDestroy {
         return;
       case Step.GameOver:
         return;
-      case Step.Continue:
-        return;
     }
   }
 
   test() {
-    const arr = [Step.Matching, Step.Pending, Step.Waiting, Step.Black, Step.White, Step.GameOver, Step.Continue];
+    const arr = [Step.Pending, Step.Black, Step.White, Step.GameOver];
     const index = arr.findIndex(st => st == this.step);
     this.step = arr[(index + 1) % arr.length];
 
