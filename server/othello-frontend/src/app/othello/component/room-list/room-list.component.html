@@ -1,6 +1,18 @@
-<p>{{userName}}</p>
-<p>{{uid}}</p>
+<mat-list>
+  <mat-list-item>
+    <label>ユーザID</label>
+    <div>{{uid | slice : 0 : 8}}</div>
+  </mat-list-item>
+  <mat-list-item>
+    <label>表示名</label>
+    <div>{{userName}}</div>
+  </mat-list-item>
+</mat-list>
+
 <div>
   <button mat-button (click)="createRoom()">部屋作成</button>
+  <button mat-icon-button (click)="refreshRoom()">
+    <mat-icon class="mat-18">refresh</mat-icon>
+  </button>
 </div>
 <app-room-table [roomList]="roomList"></app-room-table>

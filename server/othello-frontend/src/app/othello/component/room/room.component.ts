@@ -7,7 +7,7 @@ import { Board, Mass, Point, Stone, StoneType } from '../../model/game';
 import { AccountService } from 'src/app/service/account.service';
 import { Subscription } from 'rxjs';
 import { RequestService } from '../../service/request.service';
-import { Overlay } from '@angular/cdk/overlay';
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { MatSpinner } from '@angular/material/progress-spinner';
 import { GameLogicService } from '../../service/game-logic.service';
@@ -37,7 +37,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   @ViewChild('stepper') private stepper!: MatStepper;
   private readonly subscription: Subscription[] = [];
 
-  private overlayRef;
+  private overlayRef: OverlayRef;
 
   constructor(
     private router: Router,
