@@ -1,3 +1,10 @@
-table{
-  width: 100%;
+mat-list {
+  mat-list-item {
+    label{
+      width: 30%;
+    }
+    div{
+      width: 70%;
+    }
+  }
 }

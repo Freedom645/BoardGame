@@ -1,16 +1,15 @@
 <h1 mat-dialog-title></h1>
 <div mat-dialog-content>
-  <p>
-    部屋ID: {{roomId}}
-  </p>
-  <p>
-    作成日: {{created | date: 'yyyy/MM/dd HH:mm:ss'}}
-  </p>
-  <p>
-    部屋主: {{ownerName}}
-  </p>
+  <mat-list>
+    <mat-list-item *ngFor="let item of items">
+      <label>{{item.label}}</label>
+      <div>{{item.value}}</div>
+    </mat-list-item>
+  </mat-list>
+
 </div>
 <div mat-dialog-actions>
-  <button mat-raised-button (click)="onNoClick()">戻る</button>
-  <button mat-raised-button [mat-dialog-close]="true" cdkFocusInitial>参加する</button>
+  <button mat-raised-button (click)="clickButton('join')" cdkFocusInitial>参加する</button>
+  <button mat-raised-button (click)="clickButton('spectate')" cdkFocusInitial>観戦する</button>
+  <button mat-raised-button (click)="clickButton('return')">戻る</button>
 </div>

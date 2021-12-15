@@ -100,16 +100,14 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   /** メッセージ受信 */
   private receiveMessage(msg: GameMessage) {
-    console.dir(msg);
     if (!msg.response) {
       return;
     }
-    const players = msg.response.players;
     this.step = msg.response.step;
     this.board = msg.response.board;
     this.owner = msg.response.owner;
-    this.opponent = players[1];
     this.turn = msg.response.turn;
+    this.setPlayers(msg.response.players);
 
     if (this.step == "pending") {
       this.stepIndex = 0;
@@ -119,10 +117,16 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.stepIndex = 2;
     }
 
+    this.overlayRef.detach();
+  }
+
+  private setPlayers(players: Player[]) {
+    if (!players) {
+      return;
+    }
+    this.opponent = players[1];
     this.blackName = players.find(p => p.id == this.turn.blackId)?.name ?? "";
     this.whiteName = players.find(p => p.id == this.turn.whiteId)?.name ?? "";
-
-    this.overlayRef.detach();
   }
 
 }

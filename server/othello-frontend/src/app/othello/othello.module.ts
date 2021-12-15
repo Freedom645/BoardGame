@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { RoomListComponent } from './component/room-list/room-list.component';
 import { ApiService } from '../service/api.service';
 import { WebSocketService } from '../service/web-socket.service';
@@ -40,6 +40,7 @@ import { GameOverComponent } from './component/room/game-over/game-over.componen
     ResizeService,
     RequestService,
     GameLogicService,
+    DatePipe,
   ],
 })
 export class OthelloModule { }
