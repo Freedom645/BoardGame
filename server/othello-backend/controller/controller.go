@@ -212,16 +212,7 @@ func makeMelodyHandler(m *melody.Melody, r *room.Room) MelodyHandler {
 				s.Write([]byte(`"invalid request"`))
 				return
 			}
-
-			d, err := json.Marshal(model.Message{
-				Response: response,
-			})
-			if err != nil {
-				log.Error(err)
-				return
-			}
-
-			m.Broadcast([]byte(d))
+			sendResponse(m, &response)
 		},
 
 		/* セッション離脱時 */
@@ -229,15 +220,20 @@ func makeMelodyHandler(m *melody.Melody, r *room.Room) MelodyHandler {
 			userInfo := s.Keys["userInfo"].(middleware.UserInfo)
 			log.Printf("websocket connection close. [%s]\n", userInfo.Uid)
 
+			response, err := procResponse(r)
+			if err != nil {
+				log.Error(err)
+				return
+			}
 			if remain := r.RemovePlayer(userInfo.Uid); remain == 0 {
 				// 参加者が0の場合は、部屋削除
 				melodyManager.locker.Lock()
 				defer melodyManager.locker.Unlock()
 				// delete(melodyManager.sockets, r.UUID())
 
-				// TODO 観戦者に通知したい
-				// m.Broadcast([]byte("部屋解散"))
 			}
+			// 通知
+			sendResponse(m, &response)
 		},
 	}
 
@@ -282,4 +278,16 @@ func procResponse(r *room.Room) (model.ResponseMessage, error) {
 	}
 
 	return res, nil
+}
+
+func sendResponse(m *melody.Melody, response *model.ResponseMessage) {
+	d, err := json.Marshal(model.Message{
+		Response: *response,
+	})
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	m.Broadcast([]byte(d))
 }
