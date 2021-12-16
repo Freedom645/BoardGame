@@ -126,6 +126,7 @@ func (b *Board) searchReversePoint(base Point, stone st.StoneType, vector Point)
 
 /* 置ける場所を探索 */
 func (b *Board) SearchPlaceToPut(stone st.StoneType) []Point {
+	rev := st.RevStone(stone)
 	DIR := ConstDir8()
 
 	var res []Point
@@ -137,10 +138,8 @@ func (b *Board) SearchPlaceToPut(stone st.StoneType) []Point {
 			base := Point{x, y}
 			flg := false
 			for _, dir := range DIR {
-				_, err := b.searchReversePoint(base, stone, dir)
-				if err == nil {
+				if arr, err := b.searchReversePoint(base, rev, dir); err == nil && len(arr) > 0 {
 					flg = true
-					break
 				}
 			}
 			if flg {

@@ -2,6 +2,7 @@ package room
 
 import (
 	"errors"
+	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -160,8 +161,15 @@ func (r *Room) Put(uid string, p game.Point) error {
 }
 
 func (r *Room) calcNextTurn() RoomStep {
-	canPutBlack := len(r.game.Board.SearchPlaceToPut(stone_type.Black)) > 0
-	canPutWhite := len(r.game.Board.SearchPlaceToPut(stone_type.White)) > 0
+	bList := r.game.Board.SearchPlaceToPut(stone_type.Black)
+	wList := r.game.Board.SearchPlaceToPut(stone_type.White)
+
+	log.Println("Test")
+	log.Println(bList)
+	log.Println(wList)
+
+	canPutBlack := len(bList) > 0
+	canPutWhite := len(wList) > 0
 	if !canPutBlack && !canPutWhite {
 		// どっちも置けない
 		return GameOver
