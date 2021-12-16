@@ -154,13 +154,30 @@ func (r *Room) Put(uid string, p game.Point) error {
 	r.game.Board.PutOne(p, stone)
 	r.game.Board.Put(&points, stone)
 
-	if r.step == Black {
-		r.step = White
-	} else {
-		r.step = Black
-	}
+	r.step = r.calcNextTurn()
 
 	return nil
+}
+
+func (r *Room) calcNextTurn() RoomStep {
+	canPutBlack := len(r.game.Board.SearchPlaceToPut(stone_type.Black)) > 0
+	canPutWhite := len(r.game.Board.SearchPlaceToPut(stone_type.White)) > 0
+	if !canPutBlack && !canPutWhite {
+		// どっちも置けない
+		return GameOver
+	}
+
+	if r.step == Black {
+		if canPutWhite {
+			return White
+		}
+		return Black
+	}
+
+	if canPutBlack {
+		return Black
+	}
+	return White
 }
 
 /* 部屋参加 */

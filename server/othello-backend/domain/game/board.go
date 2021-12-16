@@ -124,6 +124,33 @@ func (b *Board) searchReversePoint(base Point, stone st.StoneType, vector Point)
 	return nil, errors.New("not found pair stone")
 }
 
+/* 置ける場所を探索 */
+func (b *Board) SearchPlaceToPut(stone st.StoneType) []Point {
+	DIR := ConstDir8()
+
+	var res []Point
+	for y, row := range b.stones {
+		for x, now := range row {
+			if now != st.None {
+				continue
+			}
+			base := Point{x, y}
+			flg := false
+			for _, dir := range DIR {
+				_, err := b.searchReversePoint(base, stone, dir)
+				if err == nil {
+					flg = true
+					break
+				}
+			}
+			if flg {
+				res = append(res, base)
+			}
+		}
+	}
+	return res
+}
+
 /* リストの座標に従い石を置く */
 func (b *Board) Put(list *[]Point, stone st.StoneType) int {
 	var res int = 0
